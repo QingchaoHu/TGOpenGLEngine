@@ -141,13 +141,18 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TGCamera.cpp" />
+    <ClCompile Include="TGLocalPlayer.cpp" />
+    <ClCompile Include="TGMeshFactory.cpp" />
     <ClCompile Include="TGMeshGeometry.cpp" />
     <ClCompile Include="TGShader.cpp" />
     <ClCompile Include="TGShaderProgram.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ITGBaseLight.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TGCamera.h" />
+    <ClInclude Include="TGLocalPlayer.h" />
+    <ClInclude Include="TGMeshFactory.h" />
     <ClInclude Include="TGMeshGeometry.h" />
     <ClInclude Include="TGShader.h" />
     <ClInclude Include="TGShaderProgram.h" />

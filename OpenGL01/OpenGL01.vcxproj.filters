@@ -30,6 +30,12 @@
     <ClCompile Include="TGCamera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TGLocalPlayer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TGMeshFactory.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TGShader.h">
@@ -45,6 +51,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TGCamera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TGLocalPlayer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TGMeshFactory.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ITGBaseLight.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
