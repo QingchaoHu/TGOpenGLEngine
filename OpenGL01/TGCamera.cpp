@@ -118,6 +118,16 @@ float TGCamera::GetCameraPitch()
 	return mPitch;
 }
 
+glm::vec3 TGCamera::GetCameraPosition()
+{
+	return mCameraPosition;
+}
+
+glm::vec3 TGCamera::GetCameraRotation()
+{
+	return mCameraDirection;
+}
+
 void TGCamera::UpdateInsideEulerAngle()
 {
 	glm::vec3 direction = -mCameraDirection;

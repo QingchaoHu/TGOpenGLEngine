@@ -87,9 +87,19 @@ void TGShaderProgram::SetFloat(const std::string& name, float value) const
 	glUniform1f(glGetUniformLocation(programID, name.c_str()), value);
 }
 
-void TGShaderProgram::SetVector(const std::string& name, float x, float y, float z, float w)
+void TGShaderProgram::SetVector4(const std::string& name, float x, float y, float z, float w)
 {
 	glUniform4f(glGetUniformLocation(programID, name.c_str()), x, y, z, w);
+}
+
+void TGShaderProgram::SetVector3(const std::string& name, float x, float y, float z)
+{
+	glUniform3f(glGetUniformLocation(programID, name.c_str()), x, y, z);
+}
+
+void TGShaderProgram::SetVector3(const std::string& name, glm::vec3 xyz)
+{
+	TGShaderProgram::SetVector3(name, xyz.x, xyz.y, xyz.z);
 }
 
 void TGShaderProgram::SetMatrix4x4(const std::string& name, float* mat)

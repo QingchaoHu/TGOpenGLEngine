@@ -57,6 +57,10 @@ public:
 
 	float GetCameraPitch();
 
+	glm::vec3 GetCameraPosition();
+
+	glm::vec3 GetCameraRotation();
+
 private:
 	void UpdateInsideEulerAngle();
 

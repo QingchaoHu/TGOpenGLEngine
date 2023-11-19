@@ -1,5 +1,6 @@
 #pragma once
 #include "TGShader.h"
+#include "ThirdParty/glm/glm.hpp"
 
 class TGShaderProgram
 {
@@ -20,7 +21,11 @@ public:
 
 	void SetFloat(const std::string& name, float value) const;
 
-	void SetVector(const std::string& name, float x, float y, float z, float w);
+	void SetVector4(const std::string& name, float x, float y, float z, float w);
+
+	void SetVector3(const std::string& name, float x, float y, float z);
+
+	void SetVector3(const std::string& name, glm::vec3 xyz);
 
 	void SetMatrix4x4(const std::string& name, float* mat);
 
