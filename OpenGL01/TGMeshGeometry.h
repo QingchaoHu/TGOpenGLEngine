@@ -4,6 +4,11 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <memory>
+#include "TGTexture.h"
+#include "GL/glew.h"
+
+class TGShaderProgram;
 
 enum class ETGMeshDrawType : unsigned char
 {
@@ -75,16 +80,20 @@ public:
 
 	unsigned int GetEdgeBufferDesc();
 
-	bool GenerateBuffer();
+	bool Generate();
 
-	bool UseBuffer();
+	bool DrawMesh(std::shared_ptr<TGShaderProgram> shader);
 
-	bool DrawMesh();
+	bool AddTexture(std::string texturePath, std::string type);
+
+	bool AddTexture(std::shared_ptr<TGTexture> texture);
 
 private:
 	std::vector<TGVertex> mVertices;
 
 	std::vector<unsigned int> mIndices;
+
+	std::vector<std::shared_ptr<TGTexture>> mTextures;
 
 	std::map<std::string, TGSubMeshGeometry> mSubMeshes;
 
@@ -97,4 +106,6 @@ private:
 	unsigned int mVBO;
 
 	unsigned int mEBO;
+
+	unsigned int mVAO;
 };

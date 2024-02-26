@@ -10,6 +10,12 @@ struct Material
 	vec3 diffuse;
 	vec3 specular;
 	float shininess;
+
+	sampler2D texture_diffuse1;
+	sampler2D texture_diffuse2;
+	sampler2D texture_diffuse3;
+	sampler2D texture_specular1;
+	sampler2D texture_specular2;
 };
 
 struct DirLight {
@@ -43,10 +49,6 @@ in vec2 TexCoord;
 in vec3 OutColor;
 in vec3 FragPos;
 in vec3 Normal;
-
-// texture samplers
-uniform sampler2D texture1;
-uniform sampler2D texture2;
 
 uniform Material material;
 
@@ -153,9 +155,7 @@ void main()
 	}
 
 	// linearly interpolate between both textures (80% container, 20% awesomeface)
-	vec3 mixColor = vec3(mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.6) * 0.7 + vec4(OutColor * 0.3, 1.0));
-
-	mixColor = vec3(texture(texture1, TexCoord));
+	vec3 mixColor = vec3(mix(texture(material.texture_diffuse1, TexCoord), texture(material.texture_diffuse2, TexCoord), 0.5) * 0.7 + vec4(OutColor * 0.3, 1.0));
 
 	FragColor = vec4(lightResult * mixColor, 1.0);
 }

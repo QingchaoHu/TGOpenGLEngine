@@ -39,6 +39,12 @@
     <ClCompile Include="ITGBaseLight.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TGTexture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TGModel.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TGShader.h">
@@ -66,6 +72,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TGProgram.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TGTexture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TGModel.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

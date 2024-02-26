@@ -162,6 +162,8 @@ void TGCamera::UpdateInsideMatrix()
 
 	glm::mat4x4 lookAtMatrix = glm::lookAt(mCameraPosition, mCameraTarget, mWorldUp);
 
+	lookAtMatrix = glm::rotate(lookAtMatrix, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+
 	mViewMatrix = lookAtMatrix;
 
 	if (mCameraProjectionType == ETGCameraProjectionType::TGCameraProjection_Perspective)

@@ -21,6 +21,10 @@ public:
 
 	std::shared_ptr<TGMeshGeometry> CreateCube(float size);
 
+	std::shared_ptr<TGMeshGeometry> CreateCube2(float size);
+
+	std::shared_ptr<TGMeshGeometry> CreateGrid(float size);
+
 private:
 	static std::shared_ptr<TGMeshFactory> _Instance;
 

@@ -1,10 +1,12 @@
 #include "TGMeshGeometry.h"
-#include "GL/glew.h"
+#include "TGTexture.h"
+#include "TGShaderProgram.h"
 
 TGMeshGeometry::TGMeshGeometry()
 {
 	mMeshDrawType = ETGMeshDrawType::TGMeshDrawType_Static;
 
+	glGenVertexArrays(1, &mVAO);
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 }
@@ -68,7 +70,7 @@ unsigned int TGMeshGeometry::GetEdgeBufferDesc()
 	return mEBO;
 }
 
-bool TGMeshGeometry::GenerateBuffer()
+bool TGMeshGeometry::Generate()
 {
 	std::vector<float> vertices = GetVertexData();
 	std::vector<unsigned int> indices = GetIndexData();
@@ -86,6 +88,7 @@ bool TGMeshGeometry::GenerateBuffer()
 	{
 		GLDrawType = GL_STREAM_DRAW;
 	}
+	glBindVertexArray(mVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GLDrawType);
@@ -93,25 +96,79 @@ bool TGMeshGeometry::GenerateBuffer()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(float), indices.data(), GLDrawType);
 
+	// position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 15 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 15 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// normal
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 15 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	// texcoor0
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 15 * sizeof(float), (void*)(9 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+	// texcoor1
+	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 15 * sizeof(float), (void*)(11 * sizeof(float)));
+	glEnableVertexAttribArray(4);
+	// texcoor2
+	glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, 15 * sizeof(float), (void*)(13 * sizeof(float)));
+	glEnableVertexAttribArray(5);
+
+	// Reset
+	glBindVertexArray(0);
+
 	bDirty = false;
 
 	return true;
 }
 
-bool TGMeshGeometry::UseBuffer()
+bool TGMeshGeometry::DrawMesh(std::shared_ptr<TGShaderProgram> shader)
 {
-	if (bDirty) GenerateBuffer();
+	if (bDirty) Generate();
 
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
+	unsigned int diffuseNr = 1;
+	unsigned int specularNr = 1;
+	for (unsigned int i = 0; i < mTextures.size(); ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+
+		std::string number = "";
+		std::string name = mTextures[i]->GetType();
+
+		if (name == "texture_diffuse")
+			number = std::to_string(diffuseNr++);
+		else if (name == "texture_specular")
+			number = std::to_string(specularNr++);
+
+		shader->SetInt(("material." + name + number).c_str(), i);
+		glBindTexture(GL_TEXTURE_2D, mTextures[i]->GetID());
+	}
+
+	shader->SetVector3("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader->SetVector3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+	shader->SetVector3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+	shader->SetFloat("material.shininess", 32.0f);
+
+	// ReBind VAO
+	glBindVertexArray(mVAO);
+	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)0);
+	glBindVertexArray(0);
+	return true;
+}
+
+bool TGMeshGeometry::AddTexture(std::string texturePath, std::string type)
+{
+	std::shared_ptr<TGTexture> newTexture = std::make_shared<TGTexture>(texturePath, type);
+
+	mTextures.push_back(newTexture);
 
 	return true;
 }
 
-bool TGMeshGeometry::DrawMesh()
+bool TGMeshGeometry::AddTexture(std::shared_ptr<TGTexture> texture)
 {
-	UseBuffer();
-	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)0);
+	mTextures.push_back(texture);
 
 	return true;
 }
