@@ -127,6 +127,15 @@ bool TGMeshGeometry::DrawMesh(std::shared_ptr<TGShaderProgram> shader)
 {
 	if (bDirty) Generate();
 
+	if (bOpenDepthTest)
+	{
+		glDepthFunc(GL_LESS);
+	}
+	else
+	{
+		glDepthFunc(GL_ALWAYS);
+	}
+
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
 	for (unsigned int i = 0; i < mTextures.size(); ++i)
@@ -171,4 +180,23 @@ bool TGMeshGeometry::AddTexture(std::shared_ptr<TGTexture> texture)
 	mTextures.push_back(texture);
 
 	return true;
+}
+
+void TGMeshGeometry::SetEnableDepthTest(bool useDepthTest)
+{
+	bOpenDepthTest = useDepthTest;
+}
+
+void TGMeshGeometry::SetEnableStencilTest(bool useStencilTest, int stencilValue /*= 0*/)
+{
+	bOpenStencilTest = useStencilTest;
+
+	if (bOpenStencilTest)
+	{
+		mStencilValue = stencilValue;
+	}
+	else
+	{
+		mStencilValue = false;
+	}
 }

@@ -88,6 +88,11 @@ public:
 
 	bool AddTexture(std::shared_ptr<TGTexture> texture);
 
+	void SetEnableDepthTest(bool useDepthTest);
+
+	// 这个暂时不好用，其实可以做成 Lambda 输入
+	void SetEnableStencilTest(bool useStencilTest, int stencilValue = 0);
+
 private:
 	std::vector<TGVertex> mVertices;
 
@@ -108,4 +113,10 @@ private:
 	unsigned int mEBO;
 
 	unsigned int mVAO;
+
+	bool bOpenDepthTest = true;
+
+	bool bOpenStencilTest = false;
+
+	int mStencilValue = 0; 
 };

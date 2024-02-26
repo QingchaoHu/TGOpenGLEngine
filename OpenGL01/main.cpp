@@ -2,6 +2,6 @@
 
 int main()
 {
-	TGProgram::Section2();
+	TGProgram::StencilTestSection_CubeOutline();
 }
 
