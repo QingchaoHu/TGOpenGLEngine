@@ -7,7 +7,7 @@ TGCamera::TGCamera()
 {
 	mCameraPosition = glm::vec3(1.0f, 0.0f, 1.0f);
 	mCameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-	mWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	mWorldUp = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	SetCameraLookAt(mCameraPosition, mCameraTarget);
 }
@@ -62,8 +62,8 @@ void TGCamera::SetCameraRotation(const float Roll, const float Pitch, const floa
 	mYaw = Yaw;
 	
 	float directionX = glm::cos(glm::radians(mYaw)) * glm::cos(glm::radians(mPitch));
-	float directionY = glm::sin(glm::radians(mPitch));
-	float directionZ = glm::sin(glm::radians(mYaw)) * glm::cos(glm::radians(mPitch));
+	float directionY = glm::sin(glm::radians(mYaw)) * glm::cos(glm::radians(mPitch));
+	float directionZ = glm::sin(glm::radians(mPitch));
 
 	glm::vec3 direction(directionX, directionY, directionZ);
 	direction = glm::normalize(direction);
@@ -162,7 +162,7 @@ void TGCamera::UpdateInsideMatrix()
 
 	glm::mat4x4 lookAtMatrix = glm::lookAt(mCameraPosition, mCameraTarget, mWorldUp);
 
-	lookAtMatrix = glm::rotate(lookAtMatrix, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+	// lookAtMatrix = glm::rotate(lookAtMatrix, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
 
 	mViewMatrix = lookAtMatrix;
 

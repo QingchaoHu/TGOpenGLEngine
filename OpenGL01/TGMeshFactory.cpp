@@ -216,17 +216,17 @@ std::shared_ptr<TGMeshGeometry> TGMeshFactory::CreateCube2(float size)
 	return mesh;
 }
 
-std::shared_ptr<TGMeshGeometry> TGMeshFactory::CreateGrid(float size)
+std::shared_ptr<TGMeshGeometry> TGMeshFactory::CreateGrid(float size, float uvScale)
 {
 	if (size <= 0) size = 1.0f;
 
 	float halfSize = size / 2.0f;
 
 	// 013
-	TGVertex v1(glm::vec3(halfSize, halfSize, 0), glm::vec2(1.0, 1.0), glm::vec3(1.0, 1.0, 1.0));
-	TGVertex v2(glm::vec3(halfSize, -halfSize, 0), glm::vec2(1.0, 0.0), glm::vec3(1.0, 1.0, 1.0));
+	TGVertex v1(glm::vec3(halfSize, halfSize, 0), glm::vec2(uvScale, uvScale), glm::vec3(1.0, 1.0, 1.0));
+	TGVertex v2(glm::vec3(halfSize, -halfSize, 0), glm::vec2(uvScale, 0.0), glm::vec3(1.0, 1.0, 1.0));
 	TGVertex v3(glm::vec3(-halfSize, -halfSize, 0), glm::vec2(0.0, 0.0), glm::vec3(1.0, 1.0, 1.0));
-	TGVertex v4(glm::vec3(-halfSize, halfSize, 0), glm::vec2(0.0, 1.0), glm::vec3(1.0, 1.0, 1.0));
+	TGVertex v4(glm::vec3(-halfSize, halfSize, 0), glm::vec2(0.0, uvScale), glm::vec3(1.0, 1.0, 1.0));
 
 	std::vector<TGVertex> vertices;
 	vertices.push_back(v1);

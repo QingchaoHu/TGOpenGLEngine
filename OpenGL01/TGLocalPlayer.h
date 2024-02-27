@@ -17,6 +17,10 @@ public:
 
 	void ViewRight(float Value);
 
+	void SetPlayerPosition(glm::vec3 position);
+
+	void SetPlayerLookAt(glm::vec3(position));
+
 private:
 	TGCamera* mPlayerCamera = nullptr;
 
@@ -25,7 +29,7 @@ private:
 	glm::vec3 mPlayerLocation;
 
 	// Roll Yaw Pitch
-	float mRow = 0.0;
+	float mRoll = 0.0;
 
 	float mYaw = 0.0;
 

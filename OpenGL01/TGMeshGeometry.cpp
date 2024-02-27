@@ -166,20 +166,20 @@ bool TGMeshGeometry::DrawMesh(std::shared_ptr<TGShaderProgram> shader)
 	return true;
 }
 
-bool TGMeshGeometry::AddTexture(std::string texturePath, std::string type)
+int TGMeshGeometry::AddTexture(std::string texturePath, std::string type)
 {
 	std::shared_ptr<TGTexture> newTexture = std::make_shared<TGTexture>(texturePath, type);
 
 	mTextures.push_back(newTexture);
 
-	return true;
+	return mTextures.size() - 1;
 }
 
-bool TGMeshGeometry::AddTexture(std::shared_ptr<TGTexture> texture)
+int TGMeshGeometry::AddTexture(std::shared_ptr<TGTexture> texture)
 {
 	mTextures.push_back(texture);
 
-	return true;
+	return mTextures.size() - 1;
 }
 
 void TGMeshGeometry::SetEnableDepthTest(bool useDepthTest)
@@ -199,4 +199,11 @@ void TGMeshGeometry::SetEnableStencilTest(bool useStencilTest, int stencilValue 
 	{
 		mStencilValue = false;
 	}
+}
+
+std::shared_ptr<TGTexture> TGMeshGeometry::GetTexture(int index)
+{
+	if (index >= mTextures.size() || index < 0) return nullptr;
+
+	return mTextures[index];
 }

@@ -157,5 +157,8 @@ void main()
 	// linearly interpolate between both textures (80% container, 20% awesomeface)
 	vec4 mixColor = vec4(texture(material.texture_diffuse1, TexCoord));
 
+	if (mixColor.a < 0.1)
+		discard;
+
 	FragColor = vec4(lightResult, 1.0) * mixColor;
 }

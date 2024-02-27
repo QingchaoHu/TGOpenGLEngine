@@ -1,7 +1,8 @@
 #include "TGProgram.h"
 
 int main()
-{
-	TGProgram::StencilTestSection_CubeOutline();
+{	
+	TGProgram::cameraMoveSpeed = 0.01f;
+	TGProgram::FrameBufferSection_PostProcess();
 }
 

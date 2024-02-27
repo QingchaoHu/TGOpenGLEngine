@@ -84,14 +84,16 @@ public:
 
 	bool DrawMesh(std::shared_ptr<TGShaderProgram> shader);
 
-	bool AddTexture(std::string texturePath, std::string type);
+	int AddTexture(std::string texturePath, std::string type);
 
-	bool AddTexture(std::shared_ptr<TGTexture> texture);
+	int AddTexture(std::shared_ptr<TGTexture> texture);
 
 	void SetEnableDepthTest(bool useDepthTest);
 
 	// 这个暂时不好用，其实可以做成 Lambda 输入
 	void SetEnableStencilTest(bool useStencilTest, int stencilValue = 0);
+
+	std::shared_ptr<TGTexture> GetTexture(int index);
 
 private:
 	std::vector<TGVertex> mVertices;

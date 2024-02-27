@@ -49,7 +49,7 @@ void TGLocalPlayer::ViewUp(float Value)
 	if (mPlayerCamera)
 	{
 		// std::cout << "Input RPY: " << mRow << "," << mPitch << "," << mYaw << std::endl;
-		mPlayerCamera->SetCameraRotation(mRow, mPitch, mYaw);
+		mPlayerCamera->SetCameraRotation(mRoll, mPitch, mYaw);
 	}
 }
 
@@ -62,7 +62,23 @@ void TGLocalPlayer::ViewRight(float Value)
 	if (mPlayerCamera)
 	{
 		// std::cout << "Input RPY: " << mRow << "," << mPitch << "," << mYaw << std::endl;
-		mPlayerCamera->SetCameraRotation(mRow, mPitch, mYaw);
+		mPlayerCamera->SetCameraRotation(mRoll, mPitch, mYaw);
 	}
+}
+
+void TGLocalPlayer::SetPlayerPosition(glm::vec3 position)
+{
+	mPlayerLocation = position;
+
+	mPlayerCamera->SetCameraPosition(position);
+}
+
+void TGLocalPlayer::SetPlayerLookAt(glm::vec3(position))
+{
+	mPlayerCamera->SetCameraLookAt(mPlayerLocation, position);
+
+	mPitch = mPlayerCamera->mPitch;
+	mYaw = mPlayerCamera->mYaw;
+	mRoll = mPlayerCamera->mRoll;
 }
 

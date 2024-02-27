@@ -2,6 +2,8 @@
 #include "ThirdParty/glm/glm.hpp"
 #include "ThirdParty/glm/ext/matrix_clip_space.hpp"
 
+class TGLocalPlayer;
+
 enum class ETGCameraProjectionType : unsigned char
 {
 	TGCameraProjection_Perspective = 0,
@@ -26,6 +28,9 @@ public:
 
 class TGCamera
 {
+public:
+	friend class TGLocalPlayer;
+
 public:
 	TGCamera();
 

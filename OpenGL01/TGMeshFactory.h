@@ -23,7 +23,7 @@ public:
 
 	std::shared_ptr<TGMeshGeometry> CreateCube2(float size);
 
-	std::shared_ptr<TGMeshGeometry> CreateGrid(float size);
+	std::shared_ptr<TGMeshGeometry> CreateGrid(float size, float uvScale = 1.0);
 
 private:
 	static std::shared_ptr<TGMeshFactory> _Instance;

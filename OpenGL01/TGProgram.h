@@ -38,7 +38,22 @@ public:
 	/// </summary>
 	static void StencilTestSection_CubeOutline();
 
-	static void BlendTestSection_PlateLeaf();
+	/// <summary>
+	/// 基于混合绘制植物模型（叶片）
+	/// </summary>
+	static void BlendSection_PlateLeaf();
+
+	/// <summary>
+	/// 基于混合绘制多层透明玻璃
+	/// </summary>
+	static void BlendSection_TranslucentGlass();
+
+	/// <summary>
+	/// 通过绘制两个盒子达成一个通过透明层看到盒体内部的效果
+	/// </summary>
+	static void FaceCullSection_CubeInside();
+
+	static void FrameBufferSection_PostProcess();
 
 	static std::unique_ptr<TGPointLight[]> AddPointLights();
 	static std::unique_ptr<TGDirectionLight[]> AddDirectionLight();
@@ -58,6 +73,8 @@ public:
 	static float lastY;
 	static float fov;
 
+	static float cameraMoveSpeed;
+
 	// timing
 	static float deltaTime;	// time between current frame and last frame
 	static float lastFrame;
@@ -71,6 +88,7 @@ float TGProgram::lastY = 600.0 / 2.0;
 float TGProgram::fov = 90.0f;
 float TGProgram::deltaTime = 0.0f;
 float TGProgram::lastFrame = 0.0f;
+float TGProgram::cameraMoveSpeed = 0.0005f;
 TGLocalPlayer* TGProgram::player = new TGLocalPlayer("PlayerMain");
 
 void TGProgram::Section1()
@@ -537,9 +555,628 @@ void TGProgram::StencilTestSection_CubeOutline()
 	return;
 }
 
-void TGProgram::BlendTestSection_PlateLeaf()
+void TGProgram::BlendSection_PlateLeaf()
 {
-	
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	if (glewInit() != GLEW_OK)
+	{
+		return;
+	}
+
+	TGCameraViewInfo playerCameraViewInfo;
+	playerCameraViewInfo.mAspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+	playerCameraViewInfo.mFov = fov;
+	playerCameraViewInfo.mNear = 0.001f;
+	playerCameraViewInfo.mFar = 100.0f;
+	player->GetPlayerCamera()->SetCameraViewInfo(playerCameraViewInfo);
+	player->SetPlayerPosition(glm::vec3(10, 10, 0));
+	player->SetPlayerLookAt(glm::vec3(0, 0, 0));
+
+	TGLightManager lightManager;
+	lightManager.AddPointLight(glm::vec3(4, 4, 4), glm::vec3(1, 0, 0), 0.1f, 0.09f, 0.032f);
+	lightManager.AddPointLight(glm::vec3(-4, -4, -4), glm::vec3(1, 1, 1), 0.1f, 0.09f, 0.032f);
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// Close Depth Test
+	// glDepthFunc(GL_ALWAYS);
+
+	// build and compile our shader zprogram
+	// ------------------------------------
+	TGVertexShader* baseVS = new TGVertexShader("Shaders/ground.vert", "MyVS");
+	TGFragmentShader* basePS = new TGFragmentShader("Shaders/ground.frag", "MyPS");
+	std::shared_ptr<TGShaderProgram> ourShader(new TGShaderProgram());
+	ourShader->AddVertexShader(baseVS);
+	ourShader->AddFragmentShader(basePS);
+	ourShader->BindShaderProgram();
+
+	// world space positions of our cubes
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(0.0f,  2.0f,  0.0f),
+		glm::vec3(2.0f,  0.0f,  0.0f),
+		glm::vec3(0.0f,  0.0f,  2.0f)
+	};
+
+	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
+	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
+	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+
+	std::shared_ptr<TGModel> grassModel = std::make_shared<TGModel>("Meshes/leaf/scene.gltf");
+
+	while (!glfwWindowShouldClose(window))
+	{
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		processInput(window);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// activate shader
+		ourShader->UseProgram();
+		lightManager.ApplyLightsToShaderPass(ourShader);
+
+		// pass projection matrix to shader (note that in this case it could change every frame)
+		glm::mat4 projection = player->GetPlayerCamera()->GetCameraProjectionMatrix();
+		ourShader->SetMatrix4x4("projection", glm::value_ptr(projection));
+
+		// camera/view transformation
+		glm::mat4 view = player->GetPlayerCamera()->GetCameraViewMatrix();
+		ourShader->SetMatrix4x4("view", glm::value_ptr(view));
+		ourShader->SetVector3("viewPos", player->GetPlayerCamera()->GetCameraPosition());
+
+		ourShader->UseProgram();
+		glm::mat4 model2 = glm::mat4(1.0f);
+		model2 = glm::translate(model2, glm::vec3(0, 0, 0));
+		ourShader->SetMatrix4x4("model", glm::value_ptr(model2));
+		groundGeometry->DrawMesh(ourShader);
+
+		model2 = glm::translate(model2, glm::vec3(0, 0, 1));
+		model2 = glm::rotate(model2, glm::radians(180.0f), glm::vec3(1, 0, 0));
+		ourShader->SetMatrix4x4("model", glm::value_ptr(model2));
+		grassModel->Draw(ourShader);
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+	return;
+}
+
+void TGProgram::BlendSection_TranslucentGlass()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	if (glewInit() != GLEW_OK)
+	{
+		return;
+	}
+
+	TGCameraViewInfo playerCameraViewInfo;
+	playerCameraViewInfo.mAspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+	playerCameraViewInfo.mFov = fov;
+	playerCameraViewInfo.mNear = 0.001f;
+	playerCameraViewInfo.mFar = 100.0f;
+	player->GetPlayerCamera()->SetCameraViewInfo(playerCameraViewInfo);
+	player->SetPlayerPosition(glm::vec3(10, 0, 10));
+	player->SetPlayerLookAt(glm::vec3(0, 0, 0));
+
+	TGLightManager lightManager;
+	lightManager.AddPointLight(glm::vec3(4, 4, 4), glm::vec3(1, 1, 1), 0.1f, 0.09f, 0.032f);
+	lightManager.AddPointLight(glm::vec3(-4, -4, -4), glm::vec3(1, 1, 1), 0.1f, 0.09f, 0.032f);
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// Close Depth Test
+	// glDepthFunc(GL_ALWAYS);
+
+	// build and compile our shader zprogram
+	// ------------------------------------
+	TGVertexShader* baseVS = new TGVertexShader("Shaders/ground.vert", "MyVS");
+	TGFragmentShader* basePS = new TGFragmentShader("Shaders/ground.frag", "MyPS");
+	std::shared_ptr<TGShaderProgram> ourShader(new TGShaderProgram());
+	ourShader->AddVertexShader(baseVS);
+	ourShader->AddFragmentShader(basePS);
+	ourShader->BindShaderProgram();
+
+	// world space positions of our cubes
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f, -2.0f,  0.0f),
+		glm::vec3(6.0f,  0.0f,  0.0f),
+		glm::vec3(0.0f,  6.0f,  0.0f)
+	};
+
+	glm::vec3 windowPositions[] = {
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(3.0f, 0.0f, 0.0f),
+		glm::vec3(2.0f, 1.0f, 0.0f),
+		glm::vec3(1.0f, 2.0f, 0.0f)
+	};
+
+	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
+	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
+	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+
+	std::shared_ptr<TGMeshGeometry> windowGeometry = TGMeshFactory::Get().CreateGrid(2.0);
+	windowGeometry->AddTexture("Textures/RedWindow.png", "texture_diffuse");
+
+	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
+	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
+
+	// 开启混合
+	glEnable(GL_BLEND);
+	// 混合的前后颜色参数
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// 混合的前后颜色参数，RGB 和 A 分开设置
+	// glBlendFuncSeparate();
+
+	while (!glfwWindowShouldClose(window))
+	{
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		processInput(window);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// activate shader
+		ourShader->UseProgram();
+		lightManager.ApplyLightsToShaderPass(ourShader);
+
+		// pass projection matrix to shader (note that in this case it could change every frame)
+		glm::mat4 projection = player->GetPlayerCamera()->GetCameraProjectionMatrix();
+		ourShader->SetMatrix4x4("projection", glm::value_ptr(projection));
+
+		// camera/view transformation
+		glm::mat4 view = player->GetPlayerCamera()->GetCameraViewMatrix();
+		ourShader->SetMatrix4x4("view", glm::value_ptr(view));
+		ourShader->SetVector3("viewPos", player->GetPlayerCamera()->GetCameraPosition());
+
+		ourShader->UseProgram();
+		glm::mat4 model2 = glm::mat4(1.0f);
+		model2 = glm::translate(model2, glm::vec3(0, 0, -1));
+		ourShader->SetMatrix4x4("model", glm::value_ptr(model2));
+		groundGeometry->DrawMesh(ourShader);
+
+		// 先画不透明的物体
+		for (int i = 0; i < 3; i++)
+		{
+			glm::mat4 cubeModelTransform = glm::mat4(1.0);
+			cubeModelTransform = glm::translate(cubeModelTransform, cubePositions[i]);
+			ourShader->SetMatrix4x4("model", glm::value_ptr(cubeModelTransform));
+			cubeGeometry->DrawMesh(ourShader);
+		}
+		
+		// 对透明的物体要有先后绘制顺序，做透明排序
+		std::vector<std::tuple<int, double>> toCameraDistanceArray;
+		glm::vec3 cameraPosition = player->GetPlayerCamera()->GetCameraPosition();
+		for (int i = 0; i < 4; i++)
+		{
+			double toCameraDistance = glm::length(cameraPosition - windowPositions[i]);
+			toCameraDistanceArray.push_back(std::tuple<int, double>(i, toCameraDistance));
+		}
+
+		std::sort(toCameraDistanceArray.begin(), toCameraDistanceArray.end(), [](std::tuple<int, double>& item1, std::tuple<int, double>& item2)
+		{
+			return std::get<1>(item1) > std::get<1>(item2);
+		});
+
+		for (int i = 0; i < 4; i++)
+		{
+			glm::mat4 windowModelTransform = glm::mat4(1.0);
+			windowModelTransform = glm::translate(windowModelTransform, windowPositions[std::get<0>(toCameraDistanceArray[i])]);
+			windowModelTransform = glm::rotate(windowModelTransform, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+			ourShader->SetMatrix4x4("model", glm::value_ptr(windowModelTransform));
+			windowGeometry->DrawMesh(ourShader);
+		}
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+	return;
+}
+
+void TGProgram::FaceCullSection_CubeInside()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	if (glewInit() != GLEW_OK)
+	{
+		return;
+	}
+
+	TGCameraViewInfo playerCameraViewInfo;
+	playerCameraViewInfo.mAspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+	playerCameraViewInfo.mFov = fov;
+	playerCameraViewInfo.mNear = 0.001f;
+	playerCameraViewInfo.mFar = 100.0f;
+	player->GetPlayerCamera()->SetCameraViewInfo(playerCameraViewInfo);
+	player->SetPlayerPosition(glm::vec3(10, 0, 10));
+	player->SetPlayerLookAt(glm::vec3(0, 0, 0));
+
+	TGLightManager lightManager;
+	lightManager.AddPointLight(glm::vec3(4, 4, 4), glm::vec3(1, 0, 0), 0.1f, 0.09f, 0.032f);
+	lightManager.AddPointLight(glm::vec3(-4, -4, -4), glm::vec3(0, 1, 1), 0.1f, 0.09f, 0.032f);
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// Close Depth Test
+	// glDepthFunc(GL_ALWAYS);
+
+	// build and compile our shader zprogram
+	// ------------------------------------
+	TGVertexShader* baseVS = new TGVertexShader("Shaders/ground.vert", "MyVS");
+	TGFragmentShader* basePS = new TGFragmentShader("Shaders/ground.frag", "MyPS");
+	std::shared_ptr<TGShaderProgram> ourShader(new TGShaderProgram());
+	ourShader->AddVertexShader(baseVS);
+	ourShader->AddFragmentShader(basePS);
+	ourShader->BindShaderProgram();
+
+	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
+	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
+	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+
+	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(6.0);
+	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
+
+	std::shared_ptr<TGMeshGeometry> cubeGeometry2 = TGMeshFactory::Get().CreateCube2(6.0);
+	cubeGeometry2->AddTexture("Textures/GrayGlass.png", "texture_diffuse");
+
+	std::shared_ptr<TGModel> plantModel = std::make_shared<TGModel>("Meshes/leaf/scene.gltf");
+
+	// 先画地面，再用剔除正面绘制一个 Cube
+	// 再绘制植物，再绘制一个透明的正面盒子
+
+	// 开启混合
+	glEnable(GL_BLEND);
+	// 混合的前后颜色参数
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// 混合的前后颜色参数，RGB 和 A 分开设置
+	// glBlendFuncSeparate();
+
+	while (!glfwWindowShouldClose(window))
+	{
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		processInput(window);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// activate shader
+		ourShader->UseProgram();
+		lightManager.ApplyLightsToShaderPass(ourShader);
+
+		// pass projection matrix to shader (note that in this case it could change every frame)
+		glm::mat4 projection = player->GetPlayerCamera()->GetCameraProjectionMatrix();
+		ourShader->SetMatrix4x4("projection", glm::value_ptr(projection));
+
+		// camera/view transformation
+		glm::mat4 view = player->GetPlayerCamera()->GetCameraViewMatrix();
+		ourShader->SetMatrix4x4("view", glm::value_ptr(view));
+		ourShader->SetVector3("viewPos", player->GetPlayerCamera()->GetCameraPosition());
+
+		ourShader->UseProgram();
+		glm::mat4 model2 = glm::mat4(1.0f);
+		model2 = glm::translate(model2, glm::vec3(0, 0, -1));
+		ourShader->SetMatrix4x4("model", glm::value_ptr(model2));
+		groundGeometry->DrawMesh(ourShader);
+
+		// 开启面剔除
+		glEnable(GL_CULL_FACE);
+		// 剔除正面 Or 背面
+		glCullFace(GL_FRONT);
+		// 正面是顺时针 Or 逆时针
+		glFrontFace(GL_CW);
+		glm::mat4 cubeModelTransform = glm::mat4(1.0);
+		cubeModelTransform = glm::translate(cubeModelTransform, glm::vec3(0, 0, 2.1));
+		ourShader->SetMatrix4x4("model", glm::value_ptr(cubeModelTransform));
+		cubeGeometry->DrawMesh(ourShader);
+
+		glDisable(GL_CULL_FACE);
+		glm::mat4 plantModelTransform = glm::mat4(1.0);
+		plantModelTransform = glm::translate(plantModelTransform, glm::vec3(0, 0, 2.5));
+		plantModelTransform = glm::rotate(plantModelTransform, glm::radians(180.0f), glm::vec3(1, 0, 0));
+		plantModelTransform = glm::scale(plantModelTransform, glm::vec3(0.3f, 0.3f, 0.3f));
+		ourShader->SetMatrix4x4("model", glm::value_ptr(plantModelTransform));
+		plantModel->Draw(ourShader);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CW);
+		glm::mat4 cube2ModelTransform = glm::mat4(1.0);
+		cube2ModelTransform = glm::translate(cube2ModelTransform, glm::vec3(0, 0, 2.1));
+		ourShader->SetMatrix4x4("model", glm::value_ptr(cube2ModelTransform));
+		cubeGeometry2->DrawMesh(ourShader);
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+	return;
+}
+
+void TGProgram::FrameBufferSection_PostProcess()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	if (glewInit() != GLEW_OK)
+	{
+		return;
+	}
+
+	TGCameraViewInfo playerCameraViewInfo;
+	playerCameraViewInfo.mAspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+	playerCameraViewInfo.mFov = fov;
+	playerCameraViewInfo.mNear = 0.001f;
+	playerCameraViewInfo.mFar = 100.0f;
+	player->GetPlayerCamera()->SetCameraViewInfo(playerCameraViewInfo);
+	player->SetPlayerPosition(glm::vec3(10, 0, 10));
+	player->SetPlayerLookAt(glm::vec3(0, 0, 0));
+
+	TGLightManager lightManager;
+	lightManager.AddPointLight(glm::vec3(4, 4, 4), glm::vec3(1, 0, 0), 0.1f, 0.09f, 0.032f);
+	lightManager.AddPointLight(glm::vec3(-4, -4, -4), glm::vec3(0, 1, 1), 0.1f, 0.09f, 0.032f);
+
+	// world space positions of our cubes
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f, -2.0f,  2.1f),
+		glm::vec3(6.0f,  0.0f,  2.1f),
+		glm::vec3(0.0f,  6.0f,  2.1f)
+	};
+
+	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
+	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
+	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+
+	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
+	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// Close Depth Test
+	// glDepthFunc(GL_ALWAYS);
+
+	// build and compile our shader zprogram
+	// ------------------------------------
+	TGVertexShader* baseVS = new TGVertexShader("Shaders/ground.vert", "MyVS");
+	TGFragmentShader* basePS = new TGFragmentShader("Shaders/ground.frag", "MyPS");
+	std::shared_ptr<TGShaderProgram> ourShader(new TGShaderProgram());
+	ourShader->AddVertexShader(baseVS);
+	ourShader->AddFragmentShader(basePS);
+	ourShader->BindShaderProgram();
+
+	TGVertexShader* screenVS = new TGVertexShader("Shaders/frameBuffer.vert", "SVS");
+	TGFragmentShader* screenPS = new TGFragmentShader("Shaders/frameBuffer.frag", "SPS");
+	std::shared_ptr<TGShaderProgram> screenShader(new TGShaderProgram());
+	screenShader->AddVertexShader(screenVS);
+	screenShader->AddFragmentShader(screenPS);
+	screenShader->BindShaderProgram();
+
+	float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+	// screen quad VAO
+	unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	// FrameBufferObject，帧缓冲
+	unsigned int fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	unsigned int frameBufferTexture;
+	glGenTextures(1, &frameBufferTexture);
+	glBindTexture(GL_TEXTURE_2D, frameBufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBufferTexture, 0);
+
+	unsigned int frameDepthStencilBufferTexture;
+	glGenTextures(1, &frameDepthStencilBufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+	glBindTexture(GL_TEXTURE_2D, frameDepthStencilBufferTexture);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, frameDepthStencilBufferTexture, 0);
+
+	// RenderBufferObject，渲染缓冲
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	}
+
+	// 解绑
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	while (!glfwWindowShouldClose(window))
+	{
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		processInput(window);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, rbo);
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ourShader->UseProgram();
+		lightManager.ApplyLightsToShaderPass(ourShader);
+		glm::mat4 view = player->GetPlayerCamera()->GetCameraViewMatrix();
+		ourShader->SetMatrix4x4("view", glm::value_ptr(view));
+		glm::mat4 projection = player->GetPlayerCamera()->GetCameraProjectionMatrix();
+		ourShader->SetMatrix4x4("projection", glm::value_ptr(projection));
+		ourShader->SetVector3("viewPos", player->GetPlayerCamera()->GetCameraPosition());
+
+		for (int i = 0; i < 3; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0);
+			model = glm::translate(model, cubePositions[i]);
+			ourShader->SetMatrix4x4("model", glm::value_ptr(model));
+			cubeGeometry->DrawMesh(ourShader);
+		}
+
+		glm::mat4 groundModel = glm::mat4(1.0);
+		ourShader->SetMatrix4x4("model", glm::value_ptr(groundModel));
+		groundGeometry->DrawMesh(ourShader);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST);
+
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		screenShader->UseProgram();
+		glBindVertexArray(quadVAO);
+		glBindTexture(GL_TEXTURE_2D, frameDepthStencilBufferTexture);	// use the color attachment texture as the texture of the quad plane
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+	return;
 }
 
 std::unique_ptr<TGPointLight[]> TGProgram::AddPointLights()
@@ -592,9 +1229,7 @@ void TGProgram::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	xoffset *= sensitivity;
 	yoffset *= sensitivity;
 
-	// std::cout << "Mouse: x:" << xoffset << ", " << "y:" << yoffset << std::endl;
-
-	player->ViewRight(xoffset);
+	player->ViewRight(-xoffset);
 	player->ViewUp(yoffset);
 }
 
@@ -617,21 +1252,21 @@ void TGProgram::processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		player->MoveForward(0.0005f);
+		player->MoveForward(cameraMoveSpeed);
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		player->MoveForward(-0.0005f);
+		player->MoveForward(-cameraMoveSpeed);
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		player->MoveRight(0.0005f);
+		player->MoveRight(cameraMoveSpeed);
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		player->MoveRight(-0.0005f);
+		player->MoveRight(-cameraMoveSpeed);
 	}
 }

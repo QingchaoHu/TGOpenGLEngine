@@ -110,14 +110,18 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>G:\GitRepository\TGOpenGLEngine\OpenGL01\ThirdParty\assimp\include;G:\OpenGL\glfw-3.3.8.bin.WIN64\include;G:\OpenGL\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\assimp\include;$(ProjectDir)ThirdParty\glfw-3.4.bin.WIN64\include;$(ProjectDir)ThirdParty\glew-2.2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>G:\GitRepository\TGOpenGLEngine\OpenGL01\ThirdParty\assimp\lib;G:\OpenGL\glfw-3.3.8.bin.WIN64\lib-vc2022;G:\OpenGL\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32.lib;glew32s.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)ThirdParty\assimp\lib;$(ProjectDir)ThirdParty\glfw-3.4.bin.WIN64\lib-vc2022;$(ProjectDir)ThirdParty\glew-2.2.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(ProjectDir)ThirdParty\assimp\bin\assimp-vc143-mt.dll $(OutputPath)
+copy $(ProjectDir)ThirdParty\glew-2.2.0\bin\Release\x64\glew32.dll $(OutputPath)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
