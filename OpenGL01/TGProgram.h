@@ -55,6 +55,8 @@ public:
 
 	static void FrameBufferSection_PostProcess();
 
+	static void MultiRenderTarget_DeferRenderPipeline();
+
 	static std::unique_ptr<TGPointLight[]> AddPointLights();
 	static std::unique_ptr<TGDirectionLight[]> AddDirectionLight();
 	static std::unique_ptr<TGSpotLight[]> AddSpotLight();
@@ -1107,11 +1109,11 @@ void TGProgram::FrameBufferSection_PostProcess()
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBufferTexture, 0);
 
-	unsigned int frameDepthStencilBufferTexture;
-	glGenTextures(1, &frameDepthStencilBufferTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-	glBindTexture(GL_TEXTURE_2D, frameDepthStencilBufferTexture);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, frameDepthStencilBufferTexture, 0);
+	//unsigned int frameDepthStencilBufferTexture;
+	//glGenTextures(1, &frameDepthStencilBufferTexture);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+	//glBindTexture(GL_TEXTURE_2D, frameDepthStencilBufferTexture);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, frameDepthStencilBufferTexture, 0);
 
 	// RenderBufferObject£¬äÖÈ¾»º³å
 	unsigned int rbo;
@@ -1168,7 +1170,7 @@ void TGProgram::FrameBufferSection_PostProcess()
 		glClear(GL_COLOR_BUFFER_BIT);
 		screenShader->UseProgram();
 		glBindVertexArray(quadVAO);
-		glBindTexture(GL_TEXTURE_2D, frameDepthStencilBufferTexture);	// use the color attachment texture as the texture of the quad plane
+		glBindTexture(GL_TEXTURE_2D, frameBufferTexture);	// use the color attachment texture as the texture of the quad plane
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glfwSwapBuffers(window);
@@ -1177,6 +1179,11 @@ void TGProgram::FrameBufferSection_PostProcess()
 
 	glfwTerminate();
 	return;
+}
+
+void TGProgram::MultiRenderTarget_DeferRenderPipeline()
+{
+
 }
 
 std::unique_ptr<TGPointLight[]> TGProgram::AddPointLights()

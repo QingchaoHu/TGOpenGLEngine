@@ -146,6 +146,7 @@ copy $(ProjectDir)ThirdParty\glew-2.2.0\bin\Release\x64\glew32.dll $(OutputPath)
     <ClCompile Include="ITGBaseLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TGCamera.cpp" />
+    <ClCompile Include="TGFrameBuffer.cpp" />
     <ClCompile Include="TGLocalPlayer.cpp" />
     <ClCompile Include="TGMeshFactory.cpp" />
     <ClCompile Include="TGMeshGeometry.cpp" />
@@ -158,6 +159,7 @@ copy $(ProjectDir)ThirdParty\glew-2.2.0\bin\Release\x64\glew32.dll $(OutputPath)
     <ClInclude Include="ITGBaseLight.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TGCamera.h" />
+    <ClInclude Include="TGFrameBuffer.h" />
     <ClInclude Include="TGLocalPlayer.h" />
     <ClInclude Include="TGMeshFactory.h" />
     <ClInclude Include="TGMeshGeometry.h" />
