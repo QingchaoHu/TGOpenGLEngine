@@ -20,6 +20,7 @@
 #include "TGMeshFactory.h"
 #include "ITGBaseLight.h"
 #include "TGModel.h"
+#include "TGSkyBox.h"
 
 class TGProgram
 {
@@ -56,6 +57,8 @@ public:
 	static void FrameBufferSection_PostProcess();
 
 	static void MultiRenderTarget_DeferRenderPipeline();
+
+	static void TextureCubeMapSection_Skybox();
 
 	static std::unique_ptr<TGPointLight[]> AddPointLights();
 	static std::unique_ptr<TGDirectionLight[]> AddDirectionLight();
@@ -629,7 +632,8 @@ void TGProgram::BlendSection_PlateLeaf()
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
 	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGTexture> groundGeometryTexture = std::static_pointer_cast<TGTexture>(groundGeometry->GetTexture(0));
+	groundGeometryTexture->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
 
 	std::shared_ptr<TGModel> grassModel = std::make_shared<TGModel>("Meshes/leaf/scene.gltf");
 
@@ -754,7 +758,8 @@ void TGProgram::BlendSection_TranslucentGlass()
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
 	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGTexture> groundGeometryTexture = std::static_pointer_cast<TGTexture>(groundGeometry->GetTexture(0));
+	groundGeometryTexture->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
 
 	std::shared_ptr<TGMeshGeometry> windowGeometry = TGMeshFactory::Get().CreateGrid(2.0);
 	windowGeometry->AddTexture("Textures/RedWindow.png", "texture_diffuse");
@@ -904,7 +909,8 @@ void TGProgram::FaceCullSection_CubeInside()
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
 	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGTexture> groundGeometryTexture = std::static_pointer_cast<TGTexture>(groundGeometry->GetTexture(0));
+	groundGeometryTexture->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(6.0);
 	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
@@ -1183,8 +1189,122 @@ void TGProgram::FrameBufferSection_PostProcess()
 
 void TGProgram::MultiRenderTarget_DeferRenderPipeline()
 {
-
+	
 }
+
+void TGProgram::TextureCubeMapSection_Skybox()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	if (glewInit() != GLEW_OK)
+	{
+		return;
+	}
+
+	TGCameraViewInfo playerCameraViewInfo;
+	playerCameraViewInfo.mAspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+	playerCameraViewInfo.mFov = fov;
+	playerCameraViewInfo.mNear = 0.001f;
+	playerCameraViewInfo.mFar = 300.0f;
+	player->GetPlayerCamera()->SetCameraViewInfo(playerCameraViewInfo);
+	player->SetPlayerPosition(glm::vec3(10, 10, 0));
+	player->SetPlayerLookAt(glm::vec3(0, 0, 0));
+
+	TGLightManager lightManager;
+	lightManager.AddPointLight(glm::vec3(4, 4, 4), glm::vec3(1, 1, 1), 0.1f, 0.09f, 0.032f);
+	lightManager.AddPointLight(glm::vec3(-4, -4, -4), glm::vec3(1, 1, 1), 0.1f, 0.09f, 0.032f);
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// build and compile our shader zprogram
+	// ------------------------------------
+	TGVertexShader* baseVS = new TGVertexShader("Shaders/boxReflection.vert", "MyVS");
+	TGFragmentShader* basePS = new TGFragmentShader("Shaders/boxReflection.frag", "MyPS");
+	std::shared_ptr<TGShaderProgram> ourShader(new TGShaderProgram());
+	ourShader->AddVertexShader(baseVS);
+	ourShader->AddFragmentShader(basePS);
+	ourShader->BindShaderProgram();
+
+	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(6.0);
+	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
+
+	std::shared_ptr<TGSkyBox> skyBox = std::make_shared<TGSkyBox>(100.0);
+	cubeGeometry->AddTexture(skyBox->GetSkyboxTexture());
+
+	// 开启混合
+	glEnable(GL_BLEND);
+	// 混合的前后颜色参数
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// 混合的前后颜色参数，RGB 和 A 分开设置
+	// glBlendFuncSeparate();
+
+	while (!glfwWindowShouldClose(window))
+	{
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		processInput(window);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// activate shader
+		ourShader->UseProgram();
+		lightManager.ApplyLightsToShaderPass(ourShader);
+
+		// pass projection matrix to shader (note that in this case it could change every frame)
+		glm::mat4 projection = player->GetPlayerCamera()->GetCameraProjectionMatrix();
+		ourShader->SetMatrix4x4("projection", glm::value_ptr(projection));
+
+		// camera/view transformation
+		glm::mat4 view = player->GetPlayerCamera()->GetCameraViewMatrix();
+		ourShader->SetMatrix4x4("view", glm::value_ptr(view));
+		ourShader->SetVector3("viewPos", player->GetPlayerCamera()->GetCameraPosition());
+
+		glm::mat4 cubeModelTransform = glm::mat4(1.0);
+		cubeModelTransform = glm::translate(cubeModelTransform, glm::vec3(0, 0, 2.1));
+		ourShader->SetMatrix4x4("model", glm::value_ptr(cubeModelTransform));
+		cubeGeometry->DrawMesh(ourShader);
+
+		skyBox->Draw(player);
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+	return;
+}
+
+
 
 std::unique_ptr<TGPointLight[]> TGProgram::AddPointLights()
 {

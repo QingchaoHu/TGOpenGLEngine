@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <format>
+#include <vector>
 
 enum ETGTextureAddressType
 {
@@ -8,20 +10,47 @@ enum ETGTextureAddressType
 	ETGTextureAddressType_Mirrow,
 };
 
-class TGTexture
+enum ETGTextureType
+{
+	ETGTextureType_Texture2D,
+	ETGTextureType_CubeMap
+};
+
+class ITGTexture
+{
+public:
+	virtual std::string GetType() = 0;
+
+	virtual unsigned int GetID() = 0;
+
+	virtual ETGTextureType GetTextureType();
+
+	virtual void SetTextureAddressType(ETGTextureAddressType sType, ETGTextureAddressType tType);
+
+protected:
+	unsigned int mId;
+	std::string mType;
+	bool bIsValid;
+	std::string mPath;
+	ETGTextureType mTextureType;
+};
+
+class TGTexture : public ITGTexture
 {
 public:
 	TGTexture(std::string filePath, std::string type = "");
 
-	void SetTextureAddressType(ETGTextureAddressType sType, ETGTextureAddressType tType);
+	virtual std::string GetType() override;
 
-	std::string GetType();
+	virtual unsigned int GetID() override;
+};
 
-	unsigned int GetID();
+class TGCubeTexture : public ITGTexture
+{
+public:
+	TGCubeTexture(std::vector<std::string> cubeImagePath, std::string type);
 
-private:
-	unsigned int mId;
-	std::string mType;
-	bool bIsValid = false;
-	std::string mPath;
+	virtual std::string GetType() override;
+
+	virtual unsigned int GetID() override;
 };

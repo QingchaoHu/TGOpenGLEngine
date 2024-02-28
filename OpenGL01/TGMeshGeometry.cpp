@@ -142,16 +142,24 @@ bool TGMeshGeometry::DrawMesh(std::shared_ptr<TGShaderProgram> shader)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
 
-		std::string number = "";
-		std::string name = mTextures[i]->GetType();
+		if (mTextures[i]->GetTextureType() == ETGTextureType_Texture2D)
+		{
+			std::string number = "";
+			std::string name = mTextures[i]->GetType();
 
-		if (name == "texture_diffuse")
-			number = std::to_string(diffuseNr++);
-		else if (name == "texture_specular")
-			number = std::to_string(specularNr++);
+			if (name == "texture_diffuse")
+				number = std::to_string(diffuseNr++);
+			else if (name == "texture_specular")
+				number = std::to_string(specularNr++);
 
-		shader->SetInt(("material." + name + number).c_str(), i);
-		glBindTexture(GL_TEXTURE_2D, mTextures[i]->GetID());
+			shader->SetInt(("material." + name + number).c_str(), i);
+			glBindTexture(GL_TEXTURE_2D, mTextures[i]->GetID());
+		}
+		else
+		{
+			shader->SetInt("material.round_diffuse", i);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, mTextures[i]->GetID());
+		}
 	}
 
 	shader->SetVector3("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
@@ -175,7 +183,7 @@ int TGMeshGeometry::AddTexture(std::string texturePath, std::string type)
 	return mTextures.size() - 1;
 }
 
-int TGMeshGeometry::AddTexture(std::shared_ptr<TGTexture> texture)
+int TGMeshGeometry::AddTexture(std::shared_ptr<ITGTexture> texture)
 {
 	mTextures.push_back(texture);
 
@@ -201,9 +209,85 @@ void TGMeshGeometry::SetEnableStencilTest(bool useStencilTest, int stencilValue 
 	}
 }
 
-std::shared_ptr<TGTexture> TGMeshGeometry::GetTexture(int index)
+std::shared_ptr<ITGTexture> TGMeshGeometry::GetTexture(int index)
 {
 	if (index >= mTextures.size() || index < 0) return nullptr;
 
 	return mTextures[index];
+}
+
+TGSkyBoxGeometry::TGSkyBoxGeometry() : TGMeshGeometry()
+{
+	
+}
+
+bool TGSkyBoxGeometry::DrawMesh(std::shared_ptr<TGShaderProgram> shader)
+{
+	if (bDirty) Generate();
+
+	glDepthFunc(GL_LEQUAL);
+
+	for (unsigned int i = 0; i < mTextures.size(); ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, mTextures[i]->GetID());
+	}
+
+	// ReBind VAO
+	glBindVertexArray(mVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+
+	glDepthFunc(GL_LESS);
+
+	return true;
+}
+
+bool TGSkyBoxGeometry::Generate()
+{
+	std::vector<float> vertices = GetVertexData();
+
+	GLenum GLDrawType;
+	if (mMeshDrawType == ETGMeshDrawType::TGMeshDrawType_Static)
+	{
+		GLDrawType = GL_STATIC_DRAW;
+	}
+	else if (mMeshDrawType == ETGMeshDrawType::TGMeshDrawType_Dynamic)
+	{
+		GLDrawType = GL_DYNAMIC_DRAW;
+	}
+	else
+	{
+		GLDrawType = GL_STREAM_DRAW;
+	}
+	glBindVertexArray(mVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GLDrawType);
+
+	// position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// Reset
+	glBindVertexArray(0);
+
+	bDirty = false;
+
+	return true;
+}
+
+std::vector<float> TGSkyBoxGeometry::GetVertexData()
+{
+	std::vector<float> vertexData;
+
+	for (int i = 0; i < mVertices.size(); ++i)
+	{
+		TGVertex vertex = mVertices[i];
+		vertexData.push_back(vertex.mPosition.x);
+		vertexData.push_back(vertex.mPosition.y);
+		vertexData.push_back(vertex.mPosition.z);
+	}
+
+	return vertexData;
 }

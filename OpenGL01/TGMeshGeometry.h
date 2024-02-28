@@ -72,35 +72,35 @@ public:
 
 	bool AddSubMesh(std::string SubmeshName, std::vector<TGVertex> VertexArray, std::vector<unsigned int> IndexArray);
 
-	std::vector<float> GetVertexData();
+	virtual std::vector<float> GetVertexData();
 
-	std::vector<unsigned int> GetIndexData();
+	virtual std::vector<unsigned int> GetIndexData();
 
 	unsigned int GetVertexBufferDesc();
 
 	unsigned int GetEdgeBufferDesc();
 
-	bool Generate();
+	virtual bool Generate();
 
-	bool DrawMesh(std::shared_ptr<TGShaderProgram> shader);
+	virtual bool DrawMesh(std::shared_ptr<TGShaderProgram> shader);
 
 	int AddTexture(std::string texturePath, std::string type);
 
-	int AddTexture(std::shared_ptr<TGTexture> texture);
+	int AddTexture(std::shared_ptr<ITGTexture> texture);
 
 	void SetEnableDepthTest(bool useDepthTest);
 
 	// 这个暂时不好用，其实可以做成 Lambda 输入
 	void SetEnableStencilTest(bool useStencilTest, int stencilValue = 0);
 
-	std::shared_ptr<TGTexture> GetTexture(int index);
+	std::shared_ptr<ITGTexture> GetTexture(int index);
 
-private:
+protected:
 	std::vector<TGVertex> mVertices;
 
 	std::vector<unsigned int> mIndices;
 
-	std::vector<std::shared_ptr<TGTexture>> mTextures;
+	std::vector<std::shared_ptr<ITGTexture>> mTextures;
 
 	std::map<std::string, TGSubMeshGeometry> mSubMeshes;
 
@@ -121,4 +121,16 @@ private:
 	bool bOpenStencilTest = false;
 
 	int mStencilValue = 0; 
+};
+
+class TGSkyBoxGeometry : public TGMeshGeometry
+{
+public:
+	TGSkyBoxGeometry();
+
+	virtual bool DrawMesh(std::shared_ptr<TGShaderProgram> shader) override;
+
+	virtual bool Generate() override;
+
+	virtual std::vector<float> GetVertexData() override;
 };

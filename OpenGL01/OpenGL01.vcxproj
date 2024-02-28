@@ -153,6 +153,7 @@ copy $(ProjectDir)ThirdParty\glew-2.2.0\bin\Release\x64\glew32.dll $(OutputPath)
     <ClCompile Include="TGModel.cpp" />
     <ClCompile Include="TGShader.cpp" />
     <ClCompile Include="TGShaderProgram.cpp" />
+    <ClCompile Include="TGSkyBox.cpp" />
     <ClCompile Include="TGTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +168,7 @@ copy $(ProjectDir)ThirdParty\glew-2.2.0\bin\Release\x64\glew32.dll $(OutputPath)
     <ClInclude Include="TGProgram.h" />
     <ClInclude Include="TGShader.h" />
     <ClInclude Include="TGShaderProgram.h" />
+    <ClInclude Include="TGSkyBox.h" />
     <ClInclude Include="TGTexture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

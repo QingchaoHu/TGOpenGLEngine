@@ -17,7 +17,7 @@ public:
 	float mFov = 90.0f;
 	float mAspectRatio = 1.0f;
 	float mNear = 0.1f;
-	float mFar = 100.0f;
+	float mFar = 300.0f;
 
 	// Parameter For Orthogonal
 	float mLeft = -1.0f;

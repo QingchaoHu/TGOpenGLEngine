@@ -3,6 +3,6 @@
 int main()
 {	
 	TGProgram::cameraMoveSpeed = 0.01f;
-	TGProgram::FrameBufferSection_PostProcess();
+	TGProgram::TextureCubeMapSection_Skybox();
 }
 
