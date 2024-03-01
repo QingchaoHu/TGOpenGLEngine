@@ -117,7 +117,7 @@ std::vector<std::string> TGModel::LoadMaterialTextures(aiMaterial* material, aiT
 
 		if (!skip)
 		{
-			std::shared_ptr<TGTexture> newTexture = std::make_shared<TGTexture>(mDirectory + "/" + str.C_Str(), typeName);
+			std::shared_ptr<TGTexture2D> newTexture = std::make_shared<TGTexture2D>(mDirectory + "/" + str.C_Str(), typeName);
 			mLoadedTexture.insert({ str.C_Str() + typeName, newTexture });
 		}
 	}

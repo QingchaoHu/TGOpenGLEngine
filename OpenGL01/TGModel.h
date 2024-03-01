@@ -10,7 +10,7 @@
 
 class TGShaderProgram;
 class TGMeshGeometry;
-class TGTexture;
+class TGTexture2D;
 
 class TGModel
 {
@@ -31,5 +31,5 @@ private:
 
 	std::vector<std::string> LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName);
 
-	std::unordered_map<std::string, std::shared_ptr<TGTexture>> mLoadedTexture;
+	std::unordered_map<std::string, std::shared_ptr<TGTexture2D>> mLoadedTexture;
 };

@@ -43,9 +43,9 @@ public:
 	bool ApplyLightsToShaderPass(std::shared_ptr<TGShaderProgram> program);
 
 private:
-	int mMaxPointLightNumber = 4;
+	int mMaxPointLightNumber = 200;
 	int mMaxDirectionLightNumber = 1;
-	int mMaxSpotLightNumber = 2;
+	int mMaxSpotLightNumber = 10;
 
 	std::vector<TGPointLight> mPointLights;
 	std::vector<TGDirectionLight> mDirectionLights;

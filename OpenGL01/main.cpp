@@ -2,7 +2,7 @@
 
 int main()
 {	
-	TGProgram::cameraMoveSpeed = 0.01f;
-	TGProgram::TextureCubeMapSection_Skybox();
+	TGProgram::cameraMoveSpeed = 0.1f;
+	TGProgram::MultiRenderTarget_DeferRenderPipeline();
 }
 

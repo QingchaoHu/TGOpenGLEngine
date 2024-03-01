@@ -176,7 +176,7 @@ bool TGMeshGeometry::DrawMesh(std::shared_ptr<TGShaderProgram> shader)
 
 int TGMeshGeometry::AddTexture(std::string texturePath, std::string type)
 {
-	std::shared_ptr<TGTexture> newTexture = std::make_shared<TGTexture>(texturePath, type);
+	std::shared_ptr<TGTexture2D> newTexture = std::make_shared<TGTexture2D>(texturePath, type);
 
 	mTextures.push_back(newTexture);
 

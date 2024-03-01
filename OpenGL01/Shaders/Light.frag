@@ -1,6 +1,6 @@
 #version 330 core
 
-#define NR_POINT_LIGHTS 4
+#define NR_POINT_LIGHTS 100
 #define NR_DIR_LIGHTS 1
 #define NR_SPOT_LIGHTS 2
 
@@ -63,6 +63,11 @@ uniform int actSpotLightNumber;
 
 uniform vec3 viewPos;
 
+float random(float x)
+{
+	return fract(sin(x) * 1.0);
+}
+
 vec3 CalcSpotLight(SpotLight light, Material material, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
 	vec3 lightToFragDir = normalize(light.position - fragPos);
@@ -113,7 +118,7 @@ vec3 CalcPointLight(PointLight light, Material material, vec3 normal, vec3 fragP
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
-
+	
 	return ambient + diffuse + specular;
 }
 

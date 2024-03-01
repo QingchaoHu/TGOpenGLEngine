@@ -3,6 +3,20 @@
 #include <format>
 #include <vector>
 
+enum class ETGDataFormat
+{
+	ETGDataFormat_R = 0,
+	ETGDataFormat_R16F = 1,
+	ETGDataFormat_R32F = 2,
+	ETGDataFormat_RG = 3,
+	ETGDataFormat_RG16F = 4,
+	ETGDataFormat_RG32F = 5,
+	ETGDataFormat_RGB = 6,
+	ETGDataFormat_RGB16F = 7,
+	ETGDataFormat_RGB32F = 8,
+	ETGDataFormat_RGBA = 9
+};
+
 enum ETGTextureAddressType
 {
 	ETGTextureAddressType_Repeat,
@@ -29,20 +43,43 @@ public:
 
 protected:
 	unsigned int mId;
+
 	std::string mType;
+
 	bool bIsValid;
+
 	std::string mPath;
+
 	ETGTextureType mTextureType;
 };
 
-class TGTexture : public ITGTexture
+class TGTexture2D : public ITGTexture
 {
 public:
-	TGTexture(std::string filePath, std::string type = "");
+	TGTexture2D(std::string filePath, std::string type = "");
+
+	TGTexture2D(int textureWidth, int textureHeight, ETGDataFormat format);
 
 	virtual std::string GetType() override;
 
 	virtual unsigned int GetID() override;
+
+	virtual void SetTextureDataI(unsigned char* data);
+	
+	virtual void SetTextureDataF(float* data);
+
+	virtual int GetPixelValueAtI();
+
+	virtual float GetPixelValueAtF();
+
+protected:
+	unsigned int mTexWidth;
+
+	unsigned int mTexHeight;
+
+	unsigned int mTexChannels;
+
+	ETGDataFormat mDataFormat;
 };
 
 class TGCubeTexture : public ITGTexture
