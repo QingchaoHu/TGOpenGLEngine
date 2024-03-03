@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GL/glew.h"
 
 class TGFrameBuffer
@@ -25,7 +25,11 @@ private:
 
 	unsigned int gAlbedoSpecTexture;
 
-	unsigned int gColorTexture;
+	unsigned int gMaterialParamTexture;
+
+	unsigned int gDepthStencilTexture;
+
+	unsigned int gStencilView;
 
 	unsigned int gRenderBuffer;
 

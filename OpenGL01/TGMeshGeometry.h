@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "ThirdParty/glm/glm.hpp"
 #include <map>
@@ -7,6 +7,7 @@
 #include <memory>
 #include "TGTexture.h"
 #include "GL/glew.h"
+#include "TGMaterial.h"
 
 class TGShaderProgram;
 
@@ -84,23 +85,29 @@ public:
 
 	virtual bool DrawMesh(std::shared_ptr<TGShaderProgram> shader);
 
-	int AddTexture(std::string texturePath, std::string type);
+	//int AddTexture(std::string texturePath, std::string type);
 
-	int AddTexture(std::shared_ptr<ITGTexture> texture);
+	//int AddTexture(std::shared_ptr<ITGTexture> texture);
+
+	void SetMaterial(std::shared_ptr<TGMaterial> material);
+
+	std::shared_ptr<TGMaterial> GetMaterial();
 
 	void SetEnableDepthTest(bool useDepthTest);
 
-	// Õâ¸öÔİÊ±²»ºÃÓÃ£¬ÆäÊµ¿ÉÒÔ×ö³É Lambda ÊäÈë
+	// è¿™ä¸ªæš‚æ—¶ä¸å¥½ç”¨ï¼Œå…¶å®å¯ä»¥åšæˆ Lambda è¾“å…¥
 	void SetEnableStencilTest(bool useStencilTest, int stencilValue = 0);
 
-	std::shared_ptr<ITGTexture> GetTexture(int index);
+	//std::shared_ptr<ITGTexture> GetTexture(int index);
 
 protected:
 	std::vector<TGVertex> mVertices;
 
 	std::vector<unsigned int> mIndices;
 
-	std::vector<std::shared_ptr<ITGTexture>> mTextures;
+	// std::vector<std::shared_ptr<ITGTexture>> mTextures;
+
+	std::shared_ptr<TGMaterial> mMaterial;
 
 	std::map<std::string, TGSubMeshGeometry> mSubMeshes;
 
@@ -120,7 +127,7 @@ protected:
 
 	bool bOpenStencilTest = false;
 
-	int mStencilValue = 0; 
+	int mStencilValue = 22; 
 };
 
 class TGSkyBoxGeometry : public TGMeshGeometry

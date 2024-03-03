@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #define GLEW_STATIC
 
 #include <iostream>
@@ -31,27 +31,27 @@ public:
 	static void Section2();
 
 	/// <summary>
-	/// »æÖÆÒÔÉî¶È±íÊ¾µÄ Cube
+	/// ç»˜åˆ¶ä»¥æ·±åº¦è¡¨ç¤ºçš„ Cube
 	/// </summary>
 	static void DrawCubeByDepthShader();
 
 	/// <summary>
-	/// Ê¹ÓÃÄ£°å»º³å»æÖÆÃè±ß
+	/// ä½¿ç”¨æ¨¡æ¿ç¼“å†²ç»˜åˆ¶æè¾¹
 	/// </summary>
 	static void StencilTestSection_CubeOutline();
 
 	/// <summary>
-	/// »ùÓÚ»ìºÏ»æÖÆÖ²ÎïÄ£ĞÍ£¨Ò¶Æ¬£©
+	/// åŸºäºæ··åˆç»˜åˆ¶æ¤ç‰©æ¨¡å‹ï¼ˆå¶ç‰‡ï¼‰
 	/// </summary>
 	static void BlendSection_PlateLeaf();
 
 	/// <summary>
-	/// »ùÓÚ»ìºÏ»æÖÆ¶à²ãÍ¸Ã÷²£Á§
+	/// åŸºäºæ··åˆç»˜åˆ¶å¤šå±‚é€æ˜ç»ç’ƒ
 	/// </summary>
 	static void BlendSection_TranslucentGlass();
 
 	/// <summary>
-	/// Í¨¹ı»æÖÆÁ½¸öºĞ×Ó´ï³ÉÒ»¸öÍ¨¹ıÍ¸Ã÷²ã¿´µ½ºĞÌåÄÚ²¿µÄĞ§¹û
+	/// é€šè¿‡ç»˜åˆ¶ä¸¤ä¸ªç›’å­è¾¾æˆä¸€ä¸ªé€šè¿‡é€æ˜å±‚çœ‹åˆ°ç›’ä½“å†…éƒ¨çš„æ•ˆæœ
 	/// </summary>
 	static void FaceCullSection_CubeInside();
 
@@ -60,6 +60,8 @@ public:
 	static void MultiRenderTarget_DeferRenderPipeline();
 
 	static void TextureCubeMapSection_Skybox();
+
+	static void MultiRenderTarget_TexLightBuffer1000();
 
 	static std::unique_ptr<TGPointLight[]> AddPointLights();
 	static std::unique_ptr<TGDirectionLight[]> AddDirectionLight();
@@ -200,12 +202,16 @@ void TGProgram::Section2()
 	}
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
-	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
-	cubeGeometry->AddTexture("Textures/tree.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeMaterial->AddTexture("Textures/tree.png", ETGTextureUseType_Diffuse);
+	cubeGeometry->SetMaterial(cubeMaterial);
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
-	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
 
 	std::shared_ptr<TGModel> bagModel = std::make_shared<TGModel>("Meshes/bag/Survival_BackPack_2.fbx");
 
@@ -344,11 +350,16 @@ void TGProgram::DrawCubeByDepthShader()
 	};
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
-	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
-	cubeGeometry->AddTexture("Textures/tree.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeMaterial->AddTexture("Textures/tree.png", ETGTextureUseType_Diffuse);
+	cubeGeometry->SetMaterial(cubeMaterial);
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(10.0);
-	groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -448,15 +459,15 @@ void TGProgram::StencilTestSection_CubeOutline()
 	lightManager.AddPointLight(glm::vec3(4, 4, 4), glm::vec3(1, 1, 1), 1.0f, 0.09f, 0.032f);
 	lightManager.AddPointLight(glm::vec3(-4, -4, -4), glm::vec3(1, 1, 1), 1.0f, 0.09f, 0.032f);
 
-	// ¿ªÆôÉî¶È²âÊÔ
+	// å¼€å¯æ·±åº¦æµ‹è¯•
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
-	// ¿ªÊ¼Ä£°å²âÊÔ
+	// å¼€å§‹æ¨¡æ¿æµ‹è¯•
 	glEnable(GL_STENCIL_TEST);
-	// param1: Ä£°å²âÊÔÊ§°ÜÔõÃ´°ì
-	// param2: Ä£°å²âÊÔÍ¨¹ıµ«Éî¶È²âÊÔÊ§°ÜÔõÃ´°ì
-	// param3: Ä£°åºÍÉî¶È²âÊÔ¶¼Í¨¹ıÔõÃ´°ì
+	// param1: æ¨¡æ¿æµ‹è¯•å¤±è´¥æ€ä¹ˆåŠ
+	// param2: æ¨¡æ¿æµ‹è¯•é€šè¿‡ä½†æ·±åº¦æµ‹è¯•å¤±è´¥æ€ä¹ˆåŠ
+	// param3: æ¨¡æ¿å’Œæ·±åº¦æµ‹è¯•éƒ½é€šè¿‡æ€ä¹ˆåŠ
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 	// build and compile our shader zprogram
@@ -484,15 +495,19 @@ void TGProgram::StencilTestSection_CubeOutline()
 	};
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
-	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
-	cubeGeometry->AddTexture("Textures/tree.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeMaterial->AddTexture("Textures/tree.png", ETGTextureUseType_Diffuse);
+	cubeGeometry->SetMaterial(cubeMaterial);
 
 	std::shared_ptr<TGMeshGeometry> bigCubeGeometry = TGMeshFactory::Get().CreateCube2(2.2);
-	bigCubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
-	bigCubeGeometry->AddTexture("Textures/tree.png", "texture_diffuse");
+	bigCubeGeometry->SetMaterial(cubeMaterial);
 
-	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(10.0);
-	groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
+	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
 
 	std::shared_ptr<TGModel> bagModel = std::make_shared<TGModel>("Meshes/leaf/scene.gltf");
 
@@ -507,7 +522,7 @@ void TGProgram::StencilTestSection_CubeOutline()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		// µ±Ä£°å²âÊÔÍ¨¹ı£¬½«Ä£°åÖµÉèÖÃÎª 1
+		// å½“æ¨¡æ¿æµ‹è¯•é€šè¿‡ï¼Œå°†æ¨¡æ¿å€¼è®¾ç½®ä¸º 1
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
 		// activate shader
@@ -647,9 +662,10 @@ void TGProgram::BlendSection_PlateLeaf()
 	};
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
-	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	std::shared_ptr<TGTexture2D> groundGeometryTexture = std::static_pointer_cast<TGTexture2D>(groundGeometry->GetTexture(0));
-	groundGeometryTexture->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
 
 	std::shared_ptr<TGModel> grassModel = std::make_shared<TGModel>("Meshes/leaf/scene.gltf");
 
@@ -773,22 +789,27 @@ void TGProgram::BlendSection_TranslucentGlass()
 	};
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
-	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	std::shared_ptr<TGTexture2D> groundGeometryTexture = std::static_pointer_cast<TGTexture2D>(groundGeometry->GetTexture(0));
-	groundGeometryTexture->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
 
 	std::shared_ptr<TGMeshGeometry> windowGeometry = TGMeshFactory::Get().CreateGrid(2.0);
-	windowGeometry->AddTexture("Textures/RedWindow.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> windowMaterial = std::make_shared<TGMaterial>();
+	windowMaterial->AddTexture("Textures/RedWindow.png", ETGTextureUseType_Diffuse);
+	windowGeometry->SetMaterial(windowMaterial);
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
-	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeGeometry->SetMaterial(cubeMaterial);
 
-	// ¿ªÆô»ìºÏ
+	// å¼€å¯æ··åˆ
 	glEnable(GL_BLEND);
-	// »ìºÏµÄÇ°ºóÑÕÉ«²ÎÊı
+	// æ··åˆçš„å‰åé¢œè‰²å‚æ•°
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// »ìºÏµÄÇ°ºóÑÕÉ«²ÎÊı£¬RGB ºÍ A ·Ö¿ªÉèÖÃ
+	// æ··åˆçš„å‰åé¢œè‰²å‚æ•°ï¼ŒRGB å’Œ A åˆ†å¼€è®¾ç½®
 	// glBlendFuncSeparate();
 
 	while (!glfwWindowShouldClose(window))
@@ -821,7 +842,7 @@ void TGProgram::BlendSection_TranslucentGlass()
 		ourShader->SetMatrix4x4("model", glm::value_ptr(model2));
 		groundGeometry->DrawMesh(ourShader);
 
-		// ÏÈ»­²»Í¸Ã÷µÄÎïÌå
+		// å…ˆç”»ä¸é€æ˜çš„ç‰©ä½“
 		for (int i = 0; i < 3; i++)
 		{
 			glm::mat4 cubeModelTransform = glm::mat4(1.0);
@@ -830,7 +851,7 @@ void TGProgram::BlendSection_TranslucentGlass()
 			cubeGeometry->DrawMesh(ourShader);
 		}
 		
-		// ¶ÔÍ¸Ã÷µÄÎïÌåÒªÓĞÏÈºó»æÖÆË³Ğò£¬×öÍ¸Ã÷ÅÅĞò
+		// å¯¹é€æ˜çš„ç‰©ä½“è¦æœ‰å…ˆåç»˜åˆ¶é¡ºåºï¼Œåšé€æ˜æ’åº
 		std::vector<std::tuple<int, double>> toCameraDistanceArray;
 		glm::vec3 cameraPosition = player->GetPlayerCamera()->GetCameraPosition();
 		for (int i = 0; i < 4; i++)
@@ -924,27 +945,32 @@ void TGProgram::FaceCullSection_CubeInside()
 	ourShader->BindShaderProgram();
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
-	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	std::shared_ptr<TGTexture2D> groundGeometryTexture = std::static_pointer_cast<TGTexture2D>(groundGeometry->GetTexture(0));
-	groundGeometryTexture->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(6.0);
-	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeGeometry->SetMaterial(cubeMaterial);
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry2 = TGMeshFactory::Get().CreateCube2(6.0);
-	cubeGeometry2->AddTexture("Textures/GrayGlass.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> cubeMaterial2 = std::make_shared<TGMaterial>();
+	cubeMaterial2->AddTexture("Textures/GrayGlass.png", ETGTextureUseType_Diffuse);
+	cubeGeometry2->SetMaterial(cubeMaterial2);
 
 	std::shared_ptr<TGModel> plantModel = std::make_shared<TGModel>("Meshes/leaf/scene.gltf");
 
-	// ÏÈ»­µØÃæ£¬ÔÙÓÃÌŞ³ıÕıÃæ»æÖÆÒ»¸ö Cube
-	// ÔÙ»æÖÆÖ²Îï£¬ÔÙ»æÖÆÒ»¸öÍ¸Ã÷µÄÕıÃæºĞ×Ó
+	// å…ˆç”»åœ°é¢ï¼Œå†ç”¨å‰”é™¤æ­£é¢ç»˜åˆ¶ä¸€ä¸ª Cube
+	// å†ç»˜åˆ¶æ¤ç‰©ï¼Œå†ç»˜åˆ¶ä¸€ä¸ªé€æ˜çš„æ­£é¢ç›’å­
 
-	// ¿ªÆô»ìºÏ
+	// å¼€å¯æ··åˆ
 	glEnable(GL_BLEND);
-	// »ìºÏµÄÇ°ºóÑÕÉ«²ÎÊı
+	// æ··åˆçš„å‰åé¢œè‰²å‚æ•°
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// »ìºÏµÄÇ°ºóÑÕÉ«²ÎÊı£¬RGB ºÍ A ·Ö¿ªÉèÖÃ
+	// æ··åˆçš„å‰åé¢œè‰²å‚æ•°ï¼ŒRGB å’Œ A åˆ†å¼€è®¾ç½®
 	// glBlendFuncSeparate();
 
 	while (!glfwWindowShouldClose(window))
@@ -977,11 +1003,11 @@ void TGProgram::FaceCullSection_CubeInside()
 		ourShader->SetMatrix4x4("model", glm::value_ptr(model2));
 		groundGeometry->DrawMesh(ourShader);
 
-		// ¿ªÆôÃæÌŞ³ı
+		// å¼€å¯é¢å‰”é™¤
 		glEnable(GL_CULL_FACE);
-		// ÌŞ³ıÕıÃæ Or ±³Ãæ
+		// å‰”é™¤æ­£é¢ Or èƒŒé¢
 		glCullFace(GL_FRONT);
-		// ÕıÃæÊÇË³Ê±Õë Or ÄæÊ±Õë
+		// æ­£é¢æ˜¯é¡ºæ—¶é’ˆ Or é€†æ—¶é’ˆ
 		glFrontFace(GL_CW);
 		glm::mat4 cubeModelTransform = glm::mat4(1.0);
 		cubeModelTransform = glm::translate(cubeModelTransform, glm::vec3(0, 0, 2.1));
@@ -1066,11 +1092,16 @@ void TGProgram::FrameBufferSection_PostProcess()
 	};
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
-	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->GetTexture(textureSlotIndex)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
-	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	textureSlotIndex = cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeMaterial->GetTexture(textureSlotIndex)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	cubeGeometry->SetMaterial(cubeMaterial);
 
 	// configure global opengl state
 	// -----------------------------
@@ -1118,7 +1149,7 @@ void TGProgram::FrameBufferSection_PostProcess()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-	// FrameBufferObject£¬Ö¡»º³å
+	// FrameBufferObjectï¼Œå¸§ç¼“å†²
 	unsigned int fbo;
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -1138,7 +1169,7 @@ void TGProgram::FrameBufferSection_PostProcess()
 	//glBindTexture(GL_TEXTURE_2D, frameDepthStencilBufferTexture);
 	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, frameDepthStencilBufferTexture, 0);
 
-	// RenderBufferObject£¬äÖÈ¾»º³å
+	// RenderBufferObjectï¼Œæ¸²æŸ“ç¼“å†²
 	unsigned int rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -1150,7 +1181,7 @@ void TGProgram::FrameBufferSection_PostProcess()
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	}
 
-	// ½â°ó
+	// è§£ç»‘
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	while (!glfwWindowShouldClose(window))
@@ -1305,12 +1336,16 @@ void TGProgram::MultiRenderTarget_DeferRenderPipeline()
 	}
 
 	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
-	int textureSlotIndex = groundGeometry->AddTexture("Textures/Grass.png", "texture_diffuse");
-	groundGeometry->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
-	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
-	cubeGeometry->AddTexture("Textures/wall_speca.png", "texture_specular");
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeMaterial->AddTexture("Textures/wall_speca.png", ETGTextureUseType_Specular);
+	cubeGeometry->SetMaterial(cubeMaterial);
 
 	// configure global opengl state
 	// -----------------------------
@@ -1386,8 +1421,7 @@ void TGProgram::MultiRenderTarget_DeferRenderPipeline()
 			glm::mat4 model = glm::mat4(1.0);
 			model = glm::translate(model, cubePositions[i]);
 			ourShader->SetMatrix4x4("model", glm::value_ptr(model));
-			// cubeGeometry->DrawMesh(ourShader);
-			bagModel->Draw(ourShader);
+			cubeGeometry->DrawMesh(ourShader);
 		}
 
 		glm::mat4 groundModel = glm::mat4(1.0);
@@ -1484,17 +1518,20 @@ void TGProgram::TextureCubeMapSection_Skybox()
 	ourShader->BindShaderProgram();
 
 	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(6.0);
-	cubeGeometry->AddTexture("Textures/wall.png", "texture_diffuse");
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeMaterial->AddTexture("Textures/wall_speca.png", ETGTextureUseType_Specular);
+	cubeGeometry->SetMaterial(cubeMaterial);
 
 	std::shared_ptr<TGSkyBox> skyBox = std::make_shared<TGSkyBox>(100.0);
-	cubeGeometry->AddTexture(skyBox->GetSkyboxTexture());
+	cubeMaterial->AddTexture(skyBox->GetSkyboxTexture());
 
-	// ¿ªÆô»ìºÏ
+	// å¼€å¯æ··åˆ
 	glEnable(GL_BLEND);
-	// »ìºÏµÄÇ°ºóÑÕÉ«²ÎÊı
+	// æ··åˆçš„å‰åé¢œè‰²å‚æ•°
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// »ìºÏµÄÇ°ºóÑÕÉ«²ÎÊı£¬RGB ºÍ A ·Ö¿ªÉèÖÃ
+	// æ··åˆçš„å‰åé¢œè‰²å‚æ•°ï¼ŒRGB å’Œ A åˆ†å¼€è®¾ç½®
 	// glBlendFuncSeparate();
 
 	while (!glfwWindowShouldClose(window))
@@ -1536,7 +1573,212 @@ void TGProgram::TextureCubeMapSection_Skybox()
 	return;
 }
 
+void TGProgram::MultiRenderTarget_TexLightBuffer1000()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	if (glewInit() != GLEW_OK)
+	{
+		return;
+	}
+
+	TGCameraViewInfo playerCameraViewInfo;
+	playerCameraViewInfo.mAspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+	playerCameraViewInfo.mFov = fov;
+	playerCameraViewInfo.mNear = 0.001f;
+	playerCameraViewInfo.mFar = 1000.0f;
+	player->GetPlayerCamera()->SetCameraViewInfo(playerCameraViewInfo);
+	player->SetPlayerPosition(glm::vec3(10, 0, 10));
+	player->SetPlayerLookAt(glm::vec3(0, 0, 0));
+
+	TGLightManager lightManager;
+	for (int i = -100; i < 100; i += 10)
+	{
+		for (int j = -100; j < 100; j += 10)
+		{
+			double randR = (rand() % 10000) / 10000.0;
+			double randG = (rand() % 10000) / 10000.0;
+			double randB = (rand() % 10000) / 10000.0;
+			double randZ = (rand() % 10000) / 10000.0 * 2;
+			lightManager.AddPointLight(glm::vec3(i, j, randZ), glm::vec3(randR, randG, randB), 1.0f, 1.0f, 0.6f);
+		}
+	}
+
+	lightManager.AddDirectionLight(glm::vec3(1.0, 1.0, 0.0), glm::vec3(1.0, 0.0, 0.0));
+
+	for (int i = -45; i < 50; i += 10)
+	{
+		for (int j = -45; j < 50; j++)
+		{
+			double randR = (rand() % 10000) / 10000.0;
+			double randG = (rand() % 10000) / 10000.0;
+			double randB = (rand() % 10000) / 10000.0;
+			double randZ = (rand() % 10000) / 10000.0 * 10;
+
+			double cutoff = 0.99;
+
+			lightManager.AddSpotLight(glm::vec3(i, j, randZ), glm::vec3(randR, randG, randB), glm::vec3(0, 0, 1), cutoff);
+		}
+	}
+
+	std::vector<glm::vec3> cubePositions;
+	for (int i = -100; i <= 100; i += 20)
+	{
+		for (int j = -100; j <= 100; j += 20)
+		{
+			double randZ = 1.0 + (rand() % 10000) / 10000.0 * 0;
+			cubePositions.push_back(glm::vec3(i, j, randZ));
+		}
+	}
+
+	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->AddTexture("Textures/wall_speca.png", ETGTextureUseType_Specular);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
+
+	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(2.0);
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeMaterial->AddTexture("Textures/wall_speca.png", ETGTextureUseType_Specular);
+	cubeGeometry->SetMaterial(cubeMaterial);
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// Close Depth Test
+	// glDepthFunc(GL_ALWAYS);
+
+	// build and compile our shader zprogram
+	// ------------------------------------
+	TGVertexShader* baseVS = new TGVertexShader("Shaders/gbufferMainPass.vert", "MyVS");
+	TGFragmentShader* basePS = new TGFragmentShader("Shaders/gbufferMainPass.frag", "MyPS");
+	std::shared_ptr<TGShaderProgram> ourShader(new TGShaderProgram());
+	ourShader->AddVertexShader(baseVS);
+	ourShader->AddFragmentShader(basePS);
+	ourShader->BindShaderProgram();
+
+	TGVertexShader* screenVS = new TGVertexShader("Shaders/gbufferLightPass.vert", "SVS");
+	TGFragmentShader* screenPS = new TGFragmentShader("Shaders/gBufferLightPassMass.frag", "SPS");
+	std::shared_ptr<TGShaderProgram> screenShader(new TGShaderProgram());
+	screenShader->AddVertexShader(screenVS);
+	screenShader->AddFragmentShader(screenPS);
+	screenShader->BindShaderProgram();
+
+	float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
+	// screen quad VAO
+	unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	std::shared_ptr<TGFrameBuffer> mainPassFrameBuffer = std::make_shared<TGFrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
+	int mYaw = 0;
+
+	while (!glfwWindowShouldClose(window))
+	{
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		processInput(window);
+
+		mainPassFrameBuffer->Use();
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ourShader->UseProgram();
+		lightManager.ApplyLightsToShaderPass(ourShader);
+		glm::mat4 view = player->GetPlayerCamera()->GetCameraViewMatrix();
+		ourShader->SetMatrix4x4("view", glm::value_ptr(view));
+		glm::mat4 projection = player->GetPlayerCamera()->GetCameraProjectionMatrix();
+		ourShader->SetMatrix4x4("projection", glm::value_ptr(projection));
+
+		for (int i = 0; i < cubePositions.size(); i++)
+		{
+			glm::mat4 model = glm::mat4(1.0);
+			model = glm::translate(model, cubePositions[i]);
+			ourShader->SetMatrix4x4("model", glm::value_ptr(model));
+			cubeGeometry->DrawMesh(ourShader);
+		}
+
+		glm::mat4 groundModel = glm::mat4(1.0);
+		ourShader->SetMatrix4x4("model", glm::value_ptr(groundModel));
+		groundGeometry->DrawMesh(ourShader);
+		mainPassFrameBuffer->EndUse();
+
+		glDisable(GL_DEPTH_TEST);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		screenShader->UseProgram();
+		screenShader->SetVector3("viewPos", player->GetPlayerCamera()->GetCameraPosition());
+
+		glActiveTexture(GL_TEXTURE0);
+		screenShader->SetInt("gPosition", 0);
+		glBindTexture(GL_TEXTURE_2D, mainPassFrameBuffer->GetGPositionTexture()); // use the color attachment texture as the texture of the quad plane
+		glActiveTexture(GL_TEXTURE1);
+		screenShader->SetInt("gNormal", 1);
+		glBindTexture(GL_TEXTURE_2D, mainPassFrameBuffer->GetGNormalTexture());
+		glActiveTexture(GL_TEXTURE2);
+		screenShader->SetInt("gAlbedoSpec", 2);
+		glBindTexture(GL_TEXTURE_2D, mainPassFrameBuffer->GetGAlbedoSpecTexture());
+
+		lightManager.ApplyLightsToShaderUsingTexBuffer(screenShader);
+
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+	return;
+}
 
 std::unique_ptr<TGPointLight[]> TGProgram::AddPointLights()
 {

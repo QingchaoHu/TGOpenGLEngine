@@ -1,4 +1,4 @@
-#include "TGModel.h"
+﻿#include "TGModel.h"
 #include "TGShaderProgram.h"
 #include "TGMeshGeometry.h"
 #include "assimp/scene.h"
@@ -84,24 +84,28 @@ TGMeshGeometry TGModel::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 	if (mesh->mMaterialIndex >= 0)
 	{
+		std::shared_ptr<TGMaterial> innerMaterial = std::make_shared<TGMaterial>();
+
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		std::vector<std::string> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		std::vector<std::string> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, ETGTextureUseType_Diffuse);
 		for (std::string key : diffuseMaps)
 		{
-			Mesh.AddTexture(mLoadedTexture[key]);
+			innerMaterial->AddTexture(mLoadedTexture[key]);
 		}
 
-		std::vector<std::string> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		std::vector<std::string> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, ETGTextureUseType_Specular);
 		for (std::string key : specularMaps)
 		{
-			Mesh.AddTexture(mLoadedTexture[key]);
+			innerMaterial->AddTexture(mLoadedTexture[key]);
 		}
+
+		Mesh.SetMaterial(innerMaterial);
 	}
 
 	return Mesh;
 }
 
-std::vector<std::string> TGModel::LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName)
+std::vector<std::string> TGModel::LoadMaterialTextures(aiMaterial* material, aiTextureType type, ETGTextureUseType innerType)
 {
 	std::vector<std::string> texturePaths;
 
@@ -110,15 +114,17 @@ std::vector<std::string> TGModel::LoadMaterialTextures(aiMaterial* material, aiT
 		aiString str;
 		material->GetTexture(type, i, &str);
 
-		texturePaths.push_back(str.C_Str() + typeName);
+		std::string typeV = "_" + std::to_string((int)innerType);
+		texturePaths.push_back(str.C_Str() + typeV);
 
 		bool skip = false;
-		if (mLoadedTexture.count(str.C_Str() + typeName)) skip = true;
+		if (mLoadedTexture.count(str.C_Str() + typeV)) skip = true;
 
 		if (!skip)
 		{
-			std::shared_ptr<TGTexture2D> newTexture = std::make_shared<TGTexture2D>(mDirectory + "/" + str.C_Str(), typeName);
-			mLoadedTexture.insert({ str.C_Str() + typeName, newTexture });
+			
+			std::shared_ptr<TGTexture2D> newTexture = std::make_shared<TGTexture2D>(mDirectory + "/" + str.C_Str(), innerType);
+			mLoadedTexture.insert({ str.C_Str() + typeV, newTexture });
 		}
 	}
 

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "TGShader.h"
 #include "ThirdParty/glm/glm.hpp"
 

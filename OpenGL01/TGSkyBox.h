@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <memory>
 #include "TGMeshGeometry.h"
 #include "TGShader.h"

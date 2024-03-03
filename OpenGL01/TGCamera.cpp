@@ -1,4 +1,4 @@
-#include "TGCamera.h"
+ï»¿#include "TGCamera.h"
 #include "ThirdParty/glm/glm.hpp"
 #include "ThirdParty/glm/ext/matrix_transform.hpp"
 #include <iostream>
@@ -39,7 +39,7 @@ void TGCamera::SetCameraViewInfo(const TGCameraViewInfo CameraViewInfo)
 
 void TGCamera::SetCameraPosition(const glm::vec3 Position)
 {
-	// ÖØĞÂÉèÖÃÏà»úÎ»ÖÃ£¬ÄÚ²¿µÄDirectionÊÇ·´µÄ£¬ËùÒÔÒª·´Ëã
+	// é‡æ–°è®¾ç½®ç›¸æœºä½ç½®ï¼Œå†…éƒ¨çš„Directionæ˜¯åçš„ï¼Œæ‰€ä»¥è¦åç®—
 	mCameraPosition = Position;
 
 	mCameraTarget = mCameraPosition - mCameraDirection;
@@ -49,7 +49,7 @@ void TGCamera::SetCameraPosition(const glm::vec3 Position)
 
 void TGCamera::SetCameraRotation(const glm::vec3 Rotation)
 {
-	// ´«ÈëµÄDirectionÊÇÕıµÄ£¬Òò´ËĞèÒªÕıËã
+	// ä¼ å…¥çš„Directionæ˜¯æ­£çš„ï¼Œå› æ­¤éœ€è¦æ­£ç®—
 	mCameraTarget = mCameraPosition + Rotation;
 
 	SetCameraLookAt(mCameraPosition, mCameraTarget);

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <format>
 #include <vector>
@@ -17,11 +17,17 @@ enum class ETGDataFormat
 	ETGDataFormat_RGBA = 9
 };
 
-enum ETGTextureAddressType
+enum ETGTextureWrapType
 {
 	ETGTextureAddressType_Repeat,
 	ETGTextureAddressType_ClampEdge,
 	ETGTextureAddressType_Mirrow,
+};
+
+enum ETGTextureFilterType
+{
+	ETGTextureFilterType_Linear,
+	ETGTextureFilterType_Nearest,
 };
 
 enum ETGTextureType
@@ -30,37 +36,61 @@ enum ETGTextureType
 	ETGTextureType_CubeMap
 };
 
+enum ETGTextureUseType
+{
+	// 混合
+	ETGTextureUseType_Diffuse,
+	// 反射
+	ETGTextureUseType_Specular,
+	// 环境光遮蔽
+	ETGTextureUseType_Ambient,
+	// 高光贴图
+	ETGTextureUseType_Shininess,
+	// 金属度贴图
+	ETGTextureUseType_Metalness,
+	// 粗糙度贴图
+	ETGTextureUseType_Roughness,
+	// 法线贴图
+	ETGTextureUseType_Normal,
+	// 凹凸贴图
+	ETGTextureUseType_Bump
+};
+
 class ITGTexture
 {
 public:
-	virtual std::string GetType() = 0;
+	virtual ETGTextureUseType GetUseType() = 0;
 
 	virtual unsigned int GetID() = 0;
 
 	virtual ETGTextureType GetTextureType();
 
-	virtual void SetTextureAddressType(ETGTextureAddressType sType, ETGTextureAddressType tType);
+	virtual void SetTextureAddressType(ETGTextureWrapType sType, ETGTextureWrapType tType);
+
+	virtual void SetTexureFilterType(ETGTextureFilterType magType, ETGTextureFilterType minType);
+
+	virtual void SetTextureUseType(ETGTextureUseType useType);
 
 protected:
 	unsigned int mId;
-
-	std::string mType;
 
 	bool bIsValid;
 
 	std::string mPath;
 
 	ETGTextureType mTextureType;
+
+	ETGTextureUseType mTextureUseType;
 };
 
 class TGTexture2D : public ITGTexture
 {
 public:
-	TGTexture2D(std::string filePath, std::string type = "");
+	TGTexture2D(std::string filePath, ETGTextureUseType type);
 
 	TGTexture2D(int textureWidth, int textureHeight, ETGDataFormat format);
 
-	virtual std::string GetType() override;
+	virtual ETGTextureUseType GetUseType() override;
 
 	virtual unsigned int GetID() override;
 
@@ -68,9 +98,9 @@ public:
 	
 	virtual void SetTextureDataF(float* data);
 
-	virtual int GetPixelValueAtI();
+	virtual unsigned char* GetPixelValueC();
 
-	virtual float GetPixelValueAtF();
+	virtual float* GetPixelValueF();
 
 protected:
 	unsigned int mTexWidth;
@@ -85,9 +115,9 @@ protected:
 class TGCubeTexture : public ITGTexture
 {
 public:
-	TGCubeTexture(std::vector<std::string> cubeImagePath, std::string type);
+	TGCubeTexture(std::vector<std::string> cubeImagePath, ETGTextureUseType type);
 
-	virtual std::string GetType() override;
+	virtual ETGTextureUseType GetUseType() override;
 
 	virtual unsigned int GetID() override;
 };

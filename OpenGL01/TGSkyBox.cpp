@@ -1,4 +1,4 @@
-#include "TGSkyBox.h"
+﻿#include "TGSkyBox.h"
 #include "ThirdParty/glm/glm.hpp"
 #include "../../glm/ext/matrix_transform.inl"
 #include "../../glm/gtc/type_ptr.inl"
@@ -21,10 +21,12 @@ TGSkyBox::TGSkyBox(int size)
 		"Textures/skybox/bottom_r.jpg",
 	};
 
-	mSkyBoxTexture = std::make_shared<TGCubeTexture>(skyboxTexturePath, "texture_diffuse");
+	mSkyBoxTexture = std::make_shared<TGCubeTexture>(skyboxTexturePath, ETGTextureUseType_Diffuse);
 
 	mSkyBoxGeometry = TGMeshFactory::Get().CreateSkybox(2.0);
-	mSkyBoxGeometry->AddTexture(mSkyBoxTexture);
+	std::shared_ptr<TGMaterial> skyboxMaterial = std::make_shared<TGMaterial>();
+	skyboxMaterial->AddTexture(mSkyBoxTexture);
+	mSkyBoxGeometry->SetMaterial(skyboxMaterial);
 
 	mScale = size;
 }

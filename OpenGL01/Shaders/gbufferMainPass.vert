@@ -6,11 +6,13 @@ layout (location = 2) in vec3 aNormal;
 layout (location = 3) in vec2 aTexCoord0;
 layout (location = 4) in vec2 aTexCoord1;
 layout (location = 5) in vec2 aTexCoord2;
+layout (location = 6) in float aCustomStencil;
 
 out vec2 TexCoord;
 out vec3 OutColor;
 out vec3 FragPos;
 out vec3 Normal;
+out float CustomStencil;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -27,4 +29,6 @@ void main()
     Normal = normalMatrix * aNormal;
 
 	OutColor = aColor;
+
+    CustomStencil = aCustomStencil;
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <vector>
 #include "assimp/Importer.hpp"
@@ -7,6 +7,7 @@
 #include "assimp/postprocess.h"
 #include <memory>
 #include <unordered_map>
+#include "TGTexture.h"
 
 class TGShaderProgram;
 class TGMeshGeometry;
@@ -27,9 +28,10 @@ private:
 	void LoadModel(std::string path);
 
 	void ProcessNode(aiNode* node, const aiScene* scene);
+
 	TGMeshGeometry ProcessMesh(aiMesh* mesh, const aiScene* scene);
 
-	std::vector<std::string> LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName);
+	std::vector<std::string> LoadMaterialTextures(aiMaterial* material, aiTextureType type, ETGTextureUseType innerType);
 
 	std::unordered_map<std::string, std::shared_ptr<TGTexture2D>> mLoadedTexture;
 };
