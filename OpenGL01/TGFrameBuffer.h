@@ -27,7 +27,7 @@ private:
 
 	unsigned int gMaterialParamTexture;
 
-	unsigned int gDepthStencilTexture;
+	unsigned int gDepthTexture;
 
 	unsigned int gStencilView;
 

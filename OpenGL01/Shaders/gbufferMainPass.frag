@@ -66,10 +66,8 @@ layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
 // GBuffer: 金属度 + 高光度 + 粗糙度
 layout (location = 3) out vec3 gMaterialParam;
-// // GBuffer: 场景深度 
-// layout (location = 4) out float gDepth;
-// // GBuffer: 用户自定义模板
-// layout (location = 5) out int gStencil;
+// GBuffer: 场景深度 
+layout (location = 4) out vec3 gDepth;
 
 uniform Material material;
 uniform vec3 viewPos;
@@ -82,9 +80,8 @@ void main()
     gAlbedoSpec.rgb = texture(material.texture_diffuse1, TexCoord).rgb;
     gAlbedoSpec.a = texture(material.texture_specular, TexCoord).r;
 
-	// float sceneDepth = length(FragPos - viewPos);
-	// gDepth = sceneDepth;
-	// gStencil = CustomStencil;
+	float sceneDepth = length(FragPos - viewPos);
+	gDepth.r = sceneDepth;
 
 	gMaterialParam.r = material.metalness;
 	gMaterialParam.g = material.shininess;

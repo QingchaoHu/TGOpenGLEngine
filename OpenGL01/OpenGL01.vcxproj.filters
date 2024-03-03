@@ -54,6 +54,12 @@
     <ClCompile Include="TGMaterial.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TGInstancedMesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TGScene.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TGShader.h">
@@ -96,6 +102,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TGMaterial.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TGInstancedMesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TGScene.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ITGMeshProxy.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

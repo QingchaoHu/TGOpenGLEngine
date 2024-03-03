@@ -147,11 +147,13 @@ copy $(ProjectDir)ThirdParty\glew-2.2.0\bin\Release\x64\glew32.dll $(OutputPath)
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TGCamera.cpp" />
     <ClCompile Include="TGFrameBuffer.cpp" />
+    <ClCompile Include="TGInstancedMesh.cpp" />
     <ClCompile Include="TGLocalPlayer.cpp" />
     <ClCompile Include="TGMaterial.cpp" />
     <ClCompile Include="TGMeshFactory.cpp" />
     <ClCompile Include="TGMeshGeometry.cpp" />
     <ClCompile Include="TGModel.cpp" />
+    <ClCompile Include="TGScene.cpp" />
     <ClCompile Include="TGShader.cpp" />
     <ClCompile Include="TGShaderProgram.cpp" />
     <ClCompile Include="TGSkyBox.cpp" />
@@ -159,15 +161,18 @@ copy $(ProjectDir)ThirdParty\glew-2.2.0\bin\Release\x64\glew32.dll $(OutputPath)
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ITGBaseLight.h" />
+    <ClInclude Include="ITGMeshProxy.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TGCamera.h" />
     <ClInclude Include="TGFrameBuffer.h" />
+    <ClInclude Include="TGInstancedMesh.h" />
     <ClInclude Include="TGLocalPlayer.h" />
     <ClInclude Include="TGMaterial.h" />
     <ClInclude Include="TGMeshFactory.h" />
     <ClInclude Include="TGMeshGeometry.h" />
     <ClInclude Include="TGModel.h" />
     <ClInclude Include="TGProgram.h" />
+    <ClInclude Include="TGScene.h" />
     <ClInclude Include="TGShader.h" />
     <ClInclude Include="TGShaderProgram.h" />
     <ClInclude Include="TGSkyBox.h" />
