@@ -13,7 +13,7 @@
 ![image](https://github.com/ThomasZhong1997/TGOpenGLEngine/blob/main/imgs/SkyBoxAndReflection.png)
 ## Use FrameBuffer And do Postprocess
 ![image](https://github.com/ThomasZhong1997/TGOpenGLEngine/blob/main/imgs/FrameBufferAndPostprocess.png)
-## Create Defer Render Pipeline To Draw 100 Point lights
+## Create Deferred Render Pipeline To Draw 100 Point lights
 ![image](https://github.com/ThomasZhong1997/TGOpenGLEngine/blob/main/imgs/DeferRender100Lights.png)
 ## Optimize To Draw 1000 Different Type Lights in One Scene
 ![image](https://github.com/ThomasZhong1997/TGOpenGLEngine/blob/main/imgs/DeferRender1000Lights.png)
