@@ -1305,7 +1305,7 @@ void TGProgram::MultiRenderTarget_DeferRenderPipeline()
 			double randG = (rand() % 10000) / 10000.0;
 			double randB = (rand() % 10000) / 10000.0;
 			double randZ = (rand() % 10000) / 10000.0 * 10;
-			lightManager.AddPointLight(glm::vec3(i * 10, j * 10, randZ), glm::vec3(randR, randG, randB), 0.1f, 0.09f, 0.032f);
+			lightManager.AddPointLight(glm::vec3(i * 10, j * 10, randZ), glm::vec3(randR, randG, randB), 0.1f, 0.09f, 0.1f);
 		}
 	}
 
