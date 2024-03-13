@@ -81,15 +81,11 @@ TGTexture2D::TGTexture2D(int textureWidth, int textureHeight, ETGDataFormat form
 	mTexHeight = textureHeight;
 	mDataFormat = format;
 
-	if (format == ETGDataFormat::ETGDataFormat_RGB)
+
+	if (format == ETGDataFormat::ETGDataFormat_R)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_UNSIGNED_BYTE, GL_RGB, NULL);
-		mTexChannels = 3;
-	}
-	else if (format == ETGDataFormat::ETGDataFormat_RGBA)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_UNSIGNED_BYTE, GL_RGBA, NULL);
-		mTexChannels = 4;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R, textureWidth, textureHeight, 0, GL_UNSIGNED_BYTE, GL_R, NULL);
+		mTexChannels = 1;
 	}
 	else if (format == ETGDataFormat::ETGDataFormat_R16F)
 	{
@@ -101,6 +97,11 @@ TGTexture2D::TGTexture2D(int textureWidth, int textureHeight, ETGDataFormat form
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, textureWidth, textureWidth, 0, GL_FLOAT, GL_R, NULL);
 		mTexChannels = 1;
 	}
+	else if (format == ETGDataFormat::ETGDataFormat_RG)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, textureWidth, textureHeight, 0, GL_UNSIGNED_BYTE, GL_RG, NULL);
+		mTexChannels = 2;
+	}
 	else if (format == ETGDataFormat::ETGDataFormat_RG16F)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, textureWidth, textureWidth, 0, GL_FLOAT, GL_RG, NULL);
@@ -111,6 +112,11 @@ TGTexture2D::TGTexture2D(int textureWidth, int textureHeight, ETGDataFormat form
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, textureWidth, textureWidth, 0, GL_FLOAT, GL_RG, NULL);
 		mTexChannels = 2;
 	}
+	else if (format == ETGDataFormat::ETGDataFormat_RGB)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_UNSIGNED_BYTE, GL_RGB, NULL);
+		mTexChannels = 3;
+	}
 	else if (format == ETGDataFormat::ETGDataFormat_RGB16F)
 	{	
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureWidth, textureHeight, 0, GL_FLOAT, GL_RGB, NULL);
@@ -120,6 +126,21 @@ TGTexture2D::TGTexture2D(int textureWidth, int textureHeight, ETGDataFormat form
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, textureWidth, textureHeight, 0, GL_FLOAT, GL_RGB, NULL);
 		mTexChannels = 3;
+	}
+	else if (format == ETGDataFormat::ETGDataFormat_RGBA)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_UNSIGNED_BYTE, GL_RGBA, NULL);
+		mTexChannels = 4;
+	}
+	else if (format == ETGDataFormat::ETGDataFormat_RGBA16F)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, textureWidth, textureHeight, 0, GL_FLOAT, GL_RGBA, NULL);
+		mTexChannels = 4;
+	}
+	else if (format == ETGDataFormat::ETGDataFormat_RGBA32F)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, textureWidth, textureHeight, 0, GL_FLOAT, GL_RGBA, NULL);
+		mTexChannels = 4;
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -187,6 +208,14 @@ void TGTexture2D::SetTextureDataF(float* data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, mTexWidth, mTexHeight, 0, GL_RGB, GL_FLOAT, data);
 	}
+	else if (mDataFormat == ETGDataFormat::ETGDataFormat_RGBA16F)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, mTexWidth, mTexHeight, 0, GL_RGBA, GL_FLOAT, data);
+	}
+	else if (mDataFormat == ETGDataFormat::ETGDataFormat_RGBA32F)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mTexWidth, mTexHeight, 0, GL_RGBA, GL_FLOAT, data);
+	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -241,10 +270,24 @@ float* TGTexture2D::GetPixelValueF()
 	{
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, buf);
 	}
+	else if (mDataFormat == ETGDataFormat::ETGDataFormat_RGBA16F || mDataFormat == ETGDataFormat::ETGDataFormat_RGBA32F)
+	{
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buf);
+	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return buf;
+}
+
+int TGTexture2D::GetTextureWidth()
+{
+	return mTexWidth;
+}
+
+int TGTexture2D::GetTextureHeight()
+{
+	return mTexHeight;
 }
 
 TGCubeTexture::TGCubeTexture(std::vector<std::string> cubeImagePath, ETGTextureUseType type)

@@ -60,6 +60,9 @@
     <ClCompile Include="TGScene.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TGProgram.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TGShader.h">

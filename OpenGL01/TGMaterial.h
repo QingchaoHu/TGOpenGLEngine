@@ -10,7 +10,7 @@ class TGMaterial
 public:
 	TGMaterial();
 
-	void ApplyToShader(std::shared_ptr<TGShaderProgram> shader);
+	int ApplyToShader(std::shared_ptr<TGShaderProgram> shader);
 
 	std::shared_ptr<ITGTexture> GetTexture(int index);
 

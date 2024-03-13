@@ -12,6 +12,7 @@
 class TGShaderProgram;
 class TGMeshGeometry;
 class TGTexture2D;
+class TGDrawInstanceProxy;
 
 class TGModel
 {
@@ -20,8 +21,14 @@ public:
 
 	void Draw(std::shared_ptr<TGShaderProgram> shader);
 
+	void DrawInstance(std::shared_ptr<TGShaderProgram> shader, TGDrawInstanceProxy instanceProxy);
+
+	void AddMeshObject(std::shared_ptr<TGMeshGeometry> meshComponent);
+
+	TGModel();
+
 private:
-	std::vector<TGMeshGeometry> mMeshes;
+	std::vector<std::shared_ptr<TGMeshGeometry>> mMeshes;
 
 	std::string mDirectory;
 
@@ -29,7 +36,7 @@ private:
 
 	void ProcessNode(aiNode* node, const aiScene* scene);
 
-	TGMeshGeometry ProcessMesh(aiMesh* mesh, const aiScene* scene);
+	std::shared_ptr<TGMeshGeometry> ProcessMesh(aiMesh* mesh, const aiScene* scene);
 
 	std::vector<std::string> LoadMaterialTextures(aiMaterial* material, aiTextureType type, ETGTextureUseType innerType);
 

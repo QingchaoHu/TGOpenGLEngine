@@ -153,6 +153,7 @@ copy $(ProjectDir)ThirdParty\glew-2.2.0\bin\Release\x64\glew32.dll $(OutputPath)
     <ClCompile Include="TGMeshFactory.cpp" />
     <ClCompile Include="TGMeshGeometry.cpp" />
     <ClCompile Include="TGModel.cpp" />
+    <ClCompile Include="TGProgram.cpp" />
     <ClCompile Include="TGScene.cpp" />
     <ClCompile Include="TGShader.cpp" />
     <ClCompile Include="TGShaderProgram.cpp" />
