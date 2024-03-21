@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "ThirdParty/glm/glm.hpp"
 #include <map>
