@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #define GLEW_STATIC
 
 #include <iostream>
@@ -73,8 +73,8 @@ public:
 	static void processInput(GLFWwindow* window);
 
 	// settings
-	const static unsigned int SCR_WIDTH = 1920;
-	const static unsigned int SCR_HEIGHT = 1080;
+	static unsigned int SCR_WIDTH;
+	static unsigned int SCR_HEIGHT;
 
 	static bool firstMouse;
 	static float lastX;
@@ -90,6 +90,9 @@ public:
 	static TGLocalPlayer* player;
 };
 
+// settings
+unsigned int TGProgram::SCR_WIDTH = 1920;
+unsigned int TGProgram::SCR_HEIGHT = 1080;
 bool TGProgram::firstMouse = true;
 float TGProgram::lastX = 800.0f / 2.0;
 float TGProgram::lastY = 600.0 / 2.0;
@@ -130,7 +133,7 @@ void TGProgram::Section2()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -300,7 +303,7 @@ void TGProgram::DrawCubeByDepthShader()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -441,7 +444,7 @@ void TGProgram::StencilTestSection_CubeOutline()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -617,7 +620,7 @@ void TGProgram::BlendSection_PlateLeaf()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -738,7 +741,7 @@ void TGProgram::BlendSection_TranslucentGlass()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -908,7 +911,7 @@ void TGProgram::FaceCullSection_CubeInside()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -1064,7 +1067,7 @@ void TGProgram::FrameBufferSection_PostProcess()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -1261,7 +1264,7 @@ void TGProgram::MultiRenderTarget_DeferRenderPipeline()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -1484,7 +1487,7 @@ void TGProgram::TextureCubeMapSection_Skybox()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -1599,7 +1602,7 @@ void TGProgram::MultiRenderTarget_TexLightBuffer1000()
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (glewInit() != GLEW_OK)
 	{
