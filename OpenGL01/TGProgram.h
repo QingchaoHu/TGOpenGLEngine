@@ -75,8 +75,8 @@ public:
 	static void processInput(GLFWwindow* window);
 
 	// settings
-	const static unsigned int SCR_WIDTH = 1920;
-	const static unsigned int SCR_HEIGHT = 1080;
+	static unsigned int SCR_WIDTH;
+	static unsigned int SCR_HEIGHT;
 
 	static bool firstMouse;
 	static float lastX;
@@ -92,8 +92,6 @@ public:
 	static TGLocalPlayer* player;
 };
 
-
-
 bool TGProgram::firstMouse = true;
 float TGProgram::lastX = 800.0f / 2.0;
 float TGProgram::lastY = 600.0 / 2.0;
@@ -102,6 +100,8 @@ float TGProgram::deltaTime = 0.0f;
 float TGProgram::lastFrame = 0.0f;
 float TGProgram::cameraMoveSpeed = 0.0005f;
 TGLocalPlayer* TGProgram::player = new TGLocalPlayer("PlayerMain");
+unsigned int TGProgram::SCR_HEIGHT = 1080;
+unsigned int TGProgram::SCR_WIDTH = 1920;
 
 void TGProgram::Section1()
 {

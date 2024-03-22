@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\Components">
+      <UniqueIdentifier>{687c5e4d-3a70-4731-a4f0-122f7ba98e6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Components">
+      <UniqueIdentifier>{d0feb97c-5256-497a-881c-18493f73bb09}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -62,6 +68,15 @@
     </ClCompile>
     <ClCompile Include="TGProgram.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ITGSceneItem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TGStaticMesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\TGStaticMeshComponent.cpp">
+      <Filter>源文件\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +130,12 @@
     </ClInclude>
     <ClInclude Include="ITGMeshProxy.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ITGSceneItem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\TGStaticMeshComponent.h">
+      <Filter>头文件\Components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
