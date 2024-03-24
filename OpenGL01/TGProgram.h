@@ -364,11 +364,14 @@ void TGProgram::DrawCubeByDepthShader()
 	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
 	groundGeometry->SetMaterial(groundMaterial);
 
+	float fpsTime = 0, frames = 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+		fpsTime += deltaTime;
+		frames ++;
 
 		processInput(window);
 
@@ -412,6 +415,12 @@ void TGProgram::DrawCubeByDepthShader()
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		
+		if (fpsTime > 1) {
+			glfwSetWindowTitle(window, (std::to_string(int(frames / fpsTime)) + " FPS").c_str());
+			fpsTime = 0;
+			frames = 0;
+		}
 	}
 
 	glfwTerminate();
