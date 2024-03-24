@@ -37,6 +37,10 @@ void TGCamera::SetCameraViewInfo(const TGCameraViewInfo CameraViewInfo)
 	UpdateInsideMatrix();
 }
 
+TGCameraViewInfo TGCamera::getCameraViewInfo() {
+	return mCameraViewInfo;
+}
+
 void TGCamera::SetCameraPosition(const glm::vec3 Position)
 {
 	// 重新设置相机位置，内部的Direction是反的，所以要反算

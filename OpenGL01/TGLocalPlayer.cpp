@@ -40,6 +40,18 @@ void TGLocalPlayer::MoveRight(float Value)
 	}
 }
 
+void TGLocalPlayer::MoveUp(float Value)
+{
+	if (mPlayerCamera)
+	{
+		glm::vec3 upDirection = mPlayerCamera->GetUpAxis();
+
+		mPlayerLocation += upDirection * mMoveSpeed * Value;
+
+		mPlayerCamera->SetCameraPosition(mPlayerLocation);
+	}
+}
+
 void TGLocalPlayer::ViewUp(float Value)
 {
 	mPitch += Value;

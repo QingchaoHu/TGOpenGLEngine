@@ -1845,6 +1845,9 @@ void TGProgram::scroll_callback(GLFWwindow* window, double xoffset, double yoffs
 void TGProgram::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+	auto vi = player->GetPlayerCamera()->getCameraViewInfo();
+	vi.mAspectRatio = (float)width / (float)height;
+	player->GetPlayerCamera()->SetCameraViewInfo(vi);
 }
 
 void TGProgram::processInput(GLFWwindow* window)
@@ -1872,5 +1875,15 @@ void TGProgram::processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
 		player->MoveRight(-cameraMoveSpeed);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		player->MoveUp(-cameraMoveSpeed);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		player->MoveUp(cameraMoveSpeed);
 	}
 }

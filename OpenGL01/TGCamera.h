@@ -38,6 +38,8 @@ public:
 
 	void SetCameraViewInfo(const TGCameraViewInfo CameraViewInfo);
 
+	TGCameraViewInfo getCameraViewInfo();
+
 	void SetCameraPosition(const glm::vec3 Position);
 
 	void SetCameraRotation(const glm::vec3 Rotation);

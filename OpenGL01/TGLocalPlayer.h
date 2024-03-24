@@ -13,6 +13,8 @@ public:
 
 	void MoveRight(float Value);
 
+	void MoveUp(float Value);
+
 	void ViewUp(float Value);
 
 	void ViewRight(float Value);
