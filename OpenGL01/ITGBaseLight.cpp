@@ -1,5 +1,5 @@
 ﻿#include "ITGBaseLight.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 TGLightManager::TGLightManager()
 {

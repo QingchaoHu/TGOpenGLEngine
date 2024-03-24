@@ -3,7 +3,7 @@
 #include "TGTexture.h"
 #include <memory>
 #include "TGShaderProgram.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 class TGMaterial
 {

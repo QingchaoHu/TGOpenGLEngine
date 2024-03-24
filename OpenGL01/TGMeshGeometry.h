@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 #include "TGTexture.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include "TGMaterial.h"
 
 class TGShaderProgram;

@@ -1,5 +1,5 @@
 ﻿#include "TGShaderProgram.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include "ThirdParty/glm/gtc/type_ptr.hpp"
 
 TGShaderProgram::TGShaderProgram()
