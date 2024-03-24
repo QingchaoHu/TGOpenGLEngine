@@ -6,17 +6,16 @@ start : build
 clean :
 	rm *.o main.out
 
-HEADERS := $(wildcard *.h)
-CPPS := $(wildcard *.cpp)
+CPPS := $(wildcard *TG*.cpp)
 OBJS := $(CPPS:.cpp=.o)
 
-main.out : $(OBJS) TGProgram.o
-	@# g++ -std=c++17 -static -lglfw -lGLEW -lglm -lassimp -framework OpenGL -o main.out $(OBJS)
-	g++ -lglfw -lGLEW -lglm -lassimp -framework OpenGL -o main.out $(OBJS)
+main.out : $(OBJS) main.o
+	@# g++ -std=c++17 -static -lglfw -lGLEW -lglm -lassimp -framework OpenGL -o main.out $(OBJS) main.o
+	g++ -lglfw -lGLEW -lglm -lassimp -framework OpenGL -o main.out $(OBJS) main.o
 
 $(OBJS) : %.o : %.cpp
 	g++ -c -g -std=c++17 -o $@ $^
-TGProgram.o : TGProgram.h
-	g++ -c -g -std=c++17 -o $@ $^
+main.o : TGProgram.h main.cpp
+	g++ -c -g -std=c++17 -o $@ main.cpp
 
 .PHONY : build start clean

@@ -5,16 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(lldb) 启动",
+            "name": "OpenGL01-main",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/OpenGL01/main.out",
-            "args": [],
+            "args": ["1"],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/OpenGL01/",
             "environment": [],
-            "externalConsole": true,
-            "MIMode": "lldb"
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "build"
         }
 
     ]
