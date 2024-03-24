@@ -1,60 +1,78 @@
 #include "TGProgram.h"
 #include <iostream>
+#include <string>
+#include <map>
 
-int main()
+typedef void DemoFunc();
+
+struct DemoCase {
+	std::string name;
+	DemoFunc *func;
+};
+
+#define Demo(func) { #func, func }
+
+std::map<char, DemoCase> demoCase = {
+	{ '0', Demo(TGProgram::Section2) },
+	{ 'a', Demo(TGProgram::DrawCubeByDepthShader) },
+	{ '1', Demo(TGProgram::DrawCubeByDepthShader) },
+	{ '2', Demo(TGProgram::StencilTestSection_CubeOutline) },
+	{ '3', Demo(TGProgram::BlendSection_PlateLeaf) },
+	{ '4', Demo(TGProgram::BlendSection_TranslucentGlass) },
+	{ '5', Demo(TGProgram::FaceCullSection_CubeInside) },
+	{ '6', Demo(TGProgram::FrameBufferSection_PostProcess) },
+	{ '7', Demo(TGProgram::MultiRenderTarget_DeferRenderPipeline) },
+	{ '8', Demo(TGProgram::TextureCubeMapSection_Skybox) },
+	{ '9', Demo(TGProgram::MultiRenderTarget_TexLightBuffer1000) },
+};
+
+void listCase() {
+	std::cout << "Choices: " << std::endl;
+	auto iter = demoCase.begin();
+	while (iter != demoCase.end()) {
+		std::cout << iter->first << ") " << iter->second.name << std::endl;
+		++iter;
+	}
+	std::cout << "e) exit" << std::endl;
+}
+
+bool showCase(char choice) {
+	auto c = demoCase.find(choice);
+
+	if (c != demoCase.end()) {
+		std::cout << "selected " << choice << ") " << c->second.name << std::endl;
+		c->second.func();
+		return true;
+	}
+	
+	return false;
+};
+
+int main(int argc, char **argv)
 {	
+	std::cout << "OpenGL cases" << std::endl;
+	// std::cout << "cwd = " << argv[0] << std::endl;
+
 	TGProgram::cameraMoveSpeed = 0.1f;
 
-	char choice;
-	do {
-		std::cout
-			<< "Choices:\n"
-			<< "0 Section2\n"
-			<< "1 DrawCubeByDepthShader\n"
-			<< "2 StencilTestSection_CubeOutline\n"
-			<< "3 BlendSection_PlateLeaf\n"
-			<< "4 BlendSection_TranslucentGlass\n"
-			<< "5 FaceCullSection_CubeInside\n"
-			<< "6 FrameBufferSection_PostProcess\n"
-			<< "7 MultiRenderTarget_DeferRenderPipeline\n"
-			<< "8 TextureCubeMapSection_Skybox\n"
-			<< "9 MultiRenderTarget_TexLightBuffer1000\n"
-			<< "e exit\n"
-			;
-		std::cin >> choice;
-		std::cout << "selected " << choice << std::endl;
-		switch(choice) {
-			case '0':
-				TGProgram::Section2();
-				break;
-			case '1':
-				TGProgram::DrawCubeByDepthShader();
-				break;
-			case '2':
-				TGProgram::StencilTestSection_CubeOutline();
-				break;
-			case '3':
-				TGProgram::BlendSection_PlateLeaf();
-				break;
-			case '4':
-				TGProgram::BlendSection_TranslucentGlass();
-				break;
-			case '5':
-				TGProgram::FaceCullSection_CubeInside();
-				break;
-			case '6':
-				TGProgram::FrameBufferSection_PostProcess();
-				break;
-			case '7':
-				TGProgram::MultiRenderTarget_DeferRenderPipeline();
-				break;
-			case '8':
-				TGProgram::TextureCubeMapSection_Skybox();
-				break;
-			case '9':
-				TGProgram::MultiRenderTarget_TexLightBuffer1000();
-				break;
+	if (argc > 1) {
+		char choice = argv[1][0];
+		if (!showCase(choice)) {
+			return 0;
 		}
-	} while (choice != 'e');
+		return 1;
+	}
+
+	char choice;
+	while (true) {
+		listCase();
+		std::cin >> choice;
+		if (!showCase(choice)) {
+			std::cout << "Exit" << std::endl;
+			break;
+		}
+	};
+
+	return 0;
 }
 
