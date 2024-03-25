@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "TGShader.h"
-#include "ThirdParty/glm/glm.hpp"
+#include <glm/glm.hpp>
 
 class TGShaderProgram
 {

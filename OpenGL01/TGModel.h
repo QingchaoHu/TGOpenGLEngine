@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include <string>
 #include <vector>
-#include "assimp/Importer.hpp"
-#include "assimp/material.h"
-#include "assimp/mesh.h"
-#include "assimp/postprocess.h"
+#include <assimp/Importer.hpp>
+#include <assimp/material.h>
+#include <assimp/mesh.h>
+#include <assimp/postprocess.h>
 #include <memory>
 #include <unordered_map>
 #include "TGTexture.h"

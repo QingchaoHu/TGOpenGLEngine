@@ -1,7 +1,7 @@
 ﻿#include "TGModel.h"
 #include "TGShaderProgram.h"
 #include "TGMeshGeometry.h"
-#include "assimp/scene.h"
+#include <assimp/scene.h>
 #include <set>
 
 TGModel::TGModel(std::string path)

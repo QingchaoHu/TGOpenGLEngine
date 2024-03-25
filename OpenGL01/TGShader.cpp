@@ -1,6 +1,6 @@
 ﻿#include "TGShader.h"
 #include <GL/glew.h>
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 #include <sstream>
 
 TGShader::TGShader(std::string shaderFilePath, std::string shaderName, TGShaderType shaderType)

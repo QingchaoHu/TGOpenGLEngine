@@ -1,7 +1,7 @@
 #pragma once
 #include "TGModel.h"
 #include <memory>
-#include "ThirdParty/glm/glm.hpp"
+#include <glm/glm.hpp>
 
 class TGInstancedMesh
 {

@@ -1,6 +1,6 @@
 ﻿#include "TGCamera.h"
-#include "ThirdParty/glm/glm.hpp"
-#include "ThirdParty/glm/ext/matrix_transform.hpp"
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 
 TGCamera::TGCamera()

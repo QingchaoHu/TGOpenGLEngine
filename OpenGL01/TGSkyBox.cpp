@@ -1,7 +1,7 @@
 ﻿#include "TGSkyBox.h"
-#include "ThirdParty/glm/glm.hpp"
-#include "ThirdParty/glm/ext/matrix_transform.inl"
-#include "ThirdParty/glm/gtc/type_ptr.inl"
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.inl>
+#include <glm/gtc/type_ptr.inl>
 
 TGSkyBox::TGSkyBox(int size)
 {

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ThirdParty/glm/ext/vector_float3.hpp"
+#include <glm/ext/vector_float3.hpp>
 #include <vector>
 #include <memory>
 #include "TGShaderProgram.h"

@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "ThirdParty/glm/glm.hpp"
-#include "ThirdParty/glm/ext/matrix_clip_space.hpp"
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 
 class TGLocalPlayer;
 
