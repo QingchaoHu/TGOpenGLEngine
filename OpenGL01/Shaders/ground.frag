@@ -37,8 +37,6 @@ struct Material
 
 	sampler2D texture_bump;
 
-	samplerCube texture_round;
-
 	int diffuseTexNumber;
 
 	int specularTexNumber;
@@ -55,6 +53,8 @@ struct Material
 
 	int bumpTexNumber;
 };
+
+uniform samplerCube texture_round;
 
 struct DirLight {
 	vec3 direction;
