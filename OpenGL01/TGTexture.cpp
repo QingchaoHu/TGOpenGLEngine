@@ -59,7 +59,7 @@ TGTexture2D::TGTexture2D(std::string filePath, ETGTextureUseType type)
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		std::cout << "Failed to load texture " << filePath << std::endl;
 	}
 	stbi_image_free(data);
 

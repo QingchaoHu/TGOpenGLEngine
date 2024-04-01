@@ -330,6 +330,8 @@ void TGProgram::DrawCubeByDepthShader()
 	{
 		return;
 	}
+	const char* glver = reinterpret_cast<const char *>(glGetString(GL_VERSION));
+	std::cout << "gl version: " << glver;
 
 	TGCameraViewInfo playerCameraViewInfo;
 	playerCameraViewInfo.mAspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;

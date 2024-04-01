@@ -22,7 +22,7 @@ TGShader::TGShader(std::string shaderFilePath, std::string shaderName, TGShaderT
 	}
 	catch (const std::exception&)
 	{
-		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ " << shaderFilePath << std::endl;
 	}
 
 	const char* shaderCode = shaderResourceCode.c_str();

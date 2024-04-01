@@ -5,8 +5,8 @@
 
 TGSkyBox::TGSkyBox(int size)
 {
-	mSkyBoxVS = std::make_shared<TGVertexShader>("Shaders/SkyBox.vert", "SkyVS");
-	mSkyBoxPS = std::make_shared<TGFragmentShader>("Shaders/SkyBox.frag", "SkyPS");
+	mSkyBoxVS = std::make_shared<TGVertexShader>("Shaders/skybox.vert", "SkyVS");
+	mSkyBoxPS = std::make_shared<TGFragmentShader>("Shaders/skybox.frag", "SkyPS");
 	mSkyBoxShaderProgram = std::make_shared<TGShaderProgram>();
 	mSkyBoxShaderProgram->AddVertexShader(mSkyBoxVS.get());
 	mSkyBoxShaderProgram->AddFragmentShader(mSkyBoxPS.get());
