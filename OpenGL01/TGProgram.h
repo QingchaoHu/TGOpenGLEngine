@@ -26,6 +26,9 @@
 class TGProgram
 {
 public:
+
+	static void fitScene(const std::shared_ptr<TGMeshGeometry> *geometries, const int size);
+
 	static void Section1();
 
 	static void Section2();
@@ -101,6 +104,24 @@ float TGProgram::deltaTime = 0.0f;
 float TGProgram::lastFrame = 0.0f;
 float TGProgram::cameraMoveSpeed = 0.0005f;
 TGLocalPlayer* TGProgram::player = new TGLocalPlayer("PlayerMain");
+
+void TGProgram::fitScene(const std::shared_ptr<TGMeshGeometry> *geometries, const int size) {
+	if (size == 0) return;
+
+	Box bb;
+	for (int i = 0; i < size; i ++) {
+		auto geometry = geometries[i];
+		geometry->computeBoundingBox();
+		// std::cout << *geometry->mBoundingBox << std::endl;
+		if (i == 0) bb.set(*geometry->mBoundingBox);
+		else bb.expand(*geometry->mBoundingBox);
+	}
+	Sphere bs(bb);
+	std::cout << bs << std::endl;
+	glm::vec3 position = bs.center + glm::vec3(bs.radius, bs.radius, bs.radius);
+	player->SetPlayerPosition(position);
+	player->SetPlayerLookAt(bs.center);
+}
 
 void TGProgram::Section1()
 {
@@ -363,6 +384,9 @@ void TGProgram::DrawCubeByDepthShader()
 	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
 	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
 	groundGeometry->SetMaterial(groundMaterial);
+
+	const std::shared_ptr<TGMeshGeometry> geometries[] = { cubeGeometry, groundGeometry };
+	TGProgram::fitScene(geometries, 2); // todo: cubePositions
 
 	float fpsTime = 0, frames = 0;
 	while (!glfwWindowShouldClose(window))

@@ -1,6 +1,24 @@
-﻿#include "TGMeshGeometry.h"
+﻿#include <math.h>
+#include "TGMeshGeometry.h"
 #include "TGTexture.h"
 #include "TGShaderProgram.h"
+
+
+std::ostream &operator<<(std::ostream &os, Box &box) {
+	const auto max = box.max;
+	const auto min = box.min;
+	os << "Box { max: [" << max.x << ", " << max.y << ", " << max.z << "], min: [" << min.x << ", " << min.y << ", " << min.z << "] }";
+
+	return os;
+}
+
+std::ostream &operator<<(std::ostream &os, Sphere &s) {
+	const auto center = s.center;
+	const auto radius = s.radius;
+	os << "Sphere { center: [" << center.x << ", " << center.y << ", " << center.z << "], radius: [" << radius << "}";
+
+	return os;
+}
 
 TGMeshGeometry::TGMeshGeometry()
 {
@@ -54,6 +72,32 @@ std::vector<float> TGMeshGeometry::GetVertexData()
 	}
 
 	return vertexData;
+}
+
+Box TGMeshGeometry::computeBoundingBox(bool force) {
+	if (mBoundingBox && !force) return *mBoundingBox;
+
+	if (!mBoundingBox) mBoundingBox = std::make_shared<Box>();
+
+	for (std::vector<TGVertex>::iterator it = mVertices.begin(); it != mVertices.end(); it++) {
+		if (it == mVertices.begin()) {
+			mBoundingBox->reset(it->mPosition);
+			continue;
+		}
+		mBoundingBox->expand(it->mPosition);
+	}
+
+	return *mBoundingBox;
+}
+
+Sphere TGMeshGeometry::computeBoundingSphere(bool force) {
+	if (mbBoundingSphere && !force) return *mbBoundingSphere;
+
+	computeBoundingBox();
+
+	if (!mbBoundingSphere) mbBoundingSphere = std::make_shared<Sphere>(Sphere(*mBoundingBox));
+
+	return *mbBoundingSphere;
 }
 
 std::vector<unsigned int> TGMeshGeometry::GetIndexData()

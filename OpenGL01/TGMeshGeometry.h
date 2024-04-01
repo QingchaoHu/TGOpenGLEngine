@@ -8,6 +8,7 @@
 #include "TGTexture.h"
 #include <GL/glew.h>
 #include "TGMaterial.h"
+#include <iostream>
 
 class TGShaderProgram;
 
@@ -66,6 +67,85 @@ struct TGSubMeshGeometry
 	int mVertexStartIndex;
 };
 
+struct Box {
+	glm::vec3 min = glm::vec3(0.0f, 0.0f, 0.0f );
+	glm::vec3 max = glm::vec3(0.0f, 0.0f, 0.0f );
+	Box() {};
+	Box(Box &box) {
+		max = box.max;
+		min = box.min;
+	}
+	Box set(Box &box) {
+		max = box.max;
+		min = box.min;
+
+		return *this;
+	}
+	Box reset(const glm::vec3 &point) {
+		min.x = point.x;
+		min.y = point.y;
+		min.z = point.z;
+		max.x = point.x;
+		max.y = point.y;
+		max.z = point.z;
+
+		return *this;
+	}
+	Box expand(const glm::vec3 &point) {
+		if (point.x < min.x) min.x = point.x;
+		if (point.y < min.y) min.y = point.y;
+		if (point.z < min.z) min.z = point.z;
+		if (point.x > max.x) max.x = point.x;
+		if (point.y > max.y) max.y = point.y;
+		if (point.z > max.z) max.z = point.z;
+
+		return *this;
+	}
+	Box expand(const Box &box) {
+		expand(box.min);
+		expand(box.max);
+
+		return *this;
+	}
+	 glm::vec3 getCenter(glm::vec3 &result) {
+		result.x = (min.x + max.x) / 2;
+		result.y = (min.y + max.y) / 2;
+		result.z = (min.z + max.z) / 2;
+
+		return result;
+	 }
+	 glm::vec3 getSize(glm::vec3 &result) {
+		result.x = max.x - min.x;
+		result.y = max.y - min.y;
+		result.z = max.z - min.z;
+
+		return result;
+	 }
+	 const glm::vec3 getSize() {
+		glm::vec3 result;
+		getSize(result);
+
+		return result;
+	 }
+	friend std::ostream &operator<<(std::ostream &os, Box &box);
+};
+
+struct Sphere {
+    glm::vec3 center = glm::vec3(0.0f, 0.0f, 0.0f );
+    float radius = 0;
+	Sphere(Box &box) {
+		box.getCenter(center);
+		const glm::vec3 size = box.getSize();
+		radius = fmax(fmaxf(size.x, size.y), size.z) / 2;
+	}
+	void fromBox(Box &box) {
+		box.getCenter(center);
+		const glm::vec3 size = box.getSize();
+		radius = fmax(fmaxf(size.x, size.y), size.z) / 2;
+	}
+	friend std::ostream &operator<<(std::ostream &os, Sphere &s);
+};
+
 class TGMeshGeometry
 {
 public:
@@ -99,6 +179,14 @@ public:
 	void SetEnableStencilTest(bool useStencilTest, int stencilValue = 0);
 
 	//std::shared_ptr<ITGTexture> GetTexture(int index);
+
+	std::shared_ptr<Box> mBoundingBox;
+
+	std::shared_ptr<Sphere> mbBoundingSphere;
+
+	Box computeBoundingBox(bool force = false);
+
+	Sphere computeBoundingSphere(bool force = false);
 
 protected:
 	std::vector<TGVertex> mVertices;
