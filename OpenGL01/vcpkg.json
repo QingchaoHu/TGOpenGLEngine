@@ -1,0 +1,10 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "opengl01",
+    "version": "0.0.1",
+    "description": "OpenGL01",
+    "dependencies": [
+        "glfw3", "glew", "assimp", "glm"
+    ]
+}
+
