@@ -15,8 +15,8 @@ find_package(OpenGL REQUIRED)
 #     message(STATUS ">> ${_variableName}=${${_variableName}}")
 # endforeach()
 
-# set(CMAKE_C_STANDARD 17)
-# set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SRC_LIST)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})

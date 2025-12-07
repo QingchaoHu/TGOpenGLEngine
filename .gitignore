@@ -1,5 +1,2 @@
 ﻿.vs
-*.o
-*.out
-Build
-Debug
+/Build
