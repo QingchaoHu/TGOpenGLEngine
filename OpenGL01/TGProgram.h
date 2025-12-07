@@ -66,6 +66,8 @@ public:
 
 	static void MultiRenderTarget_TexLightBuffer1000();
 
+	static void InstanceTech_MillionNumberCube();
+
 	static std::unique_ptr<TGPointLight[]> AddPointLights();
 	static std::unique_ptr<TGDirectionLight[]> AddDirectionLight();
 	static std::unique_ptr<TGSpotLight[]> AddSpotLight();
@@ -285,7 +287,7 @@ void TGProgram::Section2()
 		model2 = glm::translate(model2, glm::vec3(0, 0, -1));
 		groundShader->SetMatrix4x4("model", glm::value_ptr(model2));
 		groundGeometry->DrawMesh(groundShader);
-		
+
 		//model2 = glm::translate(model2, glm::vec3(0, 0, -2));
 		//groundShader->SetMatrix4x4("model", glm::value_ptr(model2));
 		//bagModel->Draw(groundShader);
@@ -888,7 +890,7 @@ void TGProgram::BlendSection_TranslucentGlass()
 			ourShader->SetMatrix4x4("model", glm::value_ptr(cubeModelTransform));
 			cubeGeometry->DrawMesh(ourShader);
 		}
-		
+
 		// 对透明的物体要有先后绘制顺序，做透明排序
 		std::vector<std::tuple<int, double>> toCameraDistanceArray;
 		glm::vec3 cameraPosition = player->GetPlayerCamera()->GetCameraPosition();
@@ -899,9 +901,9 @@ void TGProgram::BlendSection_TranslucentGlass()
 		}
 
 		std::sort(toCameraDistanceArray.begin(), toCameraDistanceArray.end(), [](std::tuple<int, double>& item1, std::tuple<int, double>& item2)
-		{
-			return std::get<1>(item1) > std::get<1>(item2);
-		});
+			{
+				return std::get<1>(item1) > std::get<1>(item2);
+			});
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -1788,6 +1790,242 @@ void TGProgram::MultiRenderTarget_TexLightBuffer1000()
 		groundGeometry->DrawMesh(ourShader);
 		mainPassFrameBuffer->EndUse();
 
+		glDisable(GL_DEPTH_TEST);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		screenShader->UseProgram();
+		screenShader->SetVector3("viewPos", player->GetPlayerCamera()->GetCameraPosition());
+
+		glActiveTexture(GL_TEXTURE0);
+		screenShader->SetInt("gPosition", 0);
+		glBindTexture(GL_TEXTURE_2D, mainPassFrameBuffer->GetGPositionTexture()); // use the color attachment texture as the texture of the quad plane
+		glActiveTexture(GL_TEXTURE1);
+		screenShader->SetInt("gNormal", 1);
+		glBindTexture(GL_TEXTURE_2D, mainPassFrameBuffer->GetGNormalTexture());
+		glActiveTexture(GL_TEXTURE2);
+		screenShader->SetInt("gAlbedoSpec", 2);
+		glBindTexture(GL_TEXTURE_2D, mainPassFrameBuffer->GetGAlbedoSpecTexture());
+
+		lightManager.ApplyLightsToShaderUsingTexBuffer(screenShader);
+
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
+	return;
+}
+
+void TGProgram::InstanceTech_MillionNumberCube()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+	// glfw window creation
+	// --------------------
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	if (glewInit() != GLEW_OK)
+	{
+		return;
+	}
+
+	TGCameraViewInfo playerCameraViewInfo;
+	playerCameraViewInfo.mAspectRatio = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+	playerCameraViewInfo.mFov = fov;
+	playerCameraViewInfo.mNear = 0.001f;
+	playerCameraViewInfo.mFar = 1000.0f;
+	player->GetPlayerCamera()->SetCameraViewInfo(playerCameraViewInfo);
+	player->SetPlayerPosition(glm::vec3(10, 0, 10));
+	player->SetPlayerLookAt(glm::vec3(0, 0, 0));
+
+	TGLightManager lightManager;
+	for (int i = -100; i < 100; i += 10)
+	{
+		for (int j = -100; j < 100; j += 10)
+		{
+			double randR = (rand() % 10000) / 10000.0;
+			double randG = (rand() % 10000) / 10000.0;
+			double randB = (rand() % 10000) / 10000.0;
+			double randZ = (rand() % 10000) / 10000.0 * 2;
+			lightManager.AddPointLight(glm::vec3(i, j, randZ), glm::vec3(randR, randG, randB), 1.0f, 1.0f, 0.6f);
+		}
+	}
+
+	lightManager.AddDirectionLight(glm::vec3(1.0, 1.0, 0.0), glm::vec3(1.0, 1.0, 1.0));
+
+	for (int i = -45; i < 50; i += 5)
+	{
+		for (int j = -45; j < 50; j += 5)
+		{
+			double randR = (rand() % 10000) / 10000.0;
+			double randG = (rand() % 10000) / 10000.0;
+			double randB = (rand() % 10000) / 10000.0;
+			double randZ = (rand() % 10000) / 10000.0 * 5;
+
+			double cutoff = 0.99;
+
+			lightManager.AddSpotLight(glm::vec3(i, j, randZ), glm::vec3(randR, randG, randB), glm::vec3(0, 0, 1), cutoff);
+		}
+	}
+
+	std::vector<glm::vec3> cubePositions;
+	for (int i = -500; i <= 500; i += 1)
+	{
+		for (int j = -500; j <= 500; j += 1)
+		{
+			double randZ = 1.0 + (rand() % 10000) / 10000.0 * 0;
+			cubePositions.push_back(glm::vec3(i, j, randZ));
+		}
+	}
+
+	std::shared_ptr<TGMeshGeometry> groundGeometry = TGMeshFactory::Get().CreateGrid(100.0, 10.0);
+	std::shared_ptr<TGMaterial> groundMaterial = std::make_shared<TGMaterial>();
+	int textureSlotIndex = groundMaterial->AddTexture("Textures/Grass.png", ETGTextureUseType_Diffuse);
+	groundMaterial->AddTexture("Textures/wall_speca.png", ETGTextureUseType_Specular);
+	groundMaterial->GetTexture(0)->SetTextureAddressType(ETGTextureAddressType_Repeat, ETGTextureAddressType_Repeat);
+	groundGeometry->SetMaterial(groundMaterial);
+
+	std::shared_ptr<TGMeshGeometry> cubeGeometry = TGMeshFactory::Get().CreateCube2(0.5);
+	std::shared_ptr<TGMaterial> cubeMaterial = std::make_shared<TGMaterial>();
+	cubeMaterial->AddTexture("Textures/wall.png", ETGTextureUseType_Diffuse);
+	cubeMaterial->AddTexture("Textures/wall_speca.png", ETGTextureUseType_Specular);
+	cubeGeometry->SetMaterial(cubeMaterial);
+
+	std::shared_ptr<TGModel> cubeModel = std::make_shared<TGModel>();
+	cubeModel->AddMeshObject(cubeGeometry);
+
+	std::shared_ptr<TGInstancedModel> cubeInstanceComponent = std::make_shared<TGInstancedModel>(cubeModel);
+	float* cubeCustomData = new float[cubePositions.size() * 4];
+	cubeInstanceComponent->mPerInstancedCustomDataNumber = 4;
+	for (int i = 0; i < cubePositions.size(); i++)
+	{
+		glm::mat4 transformMat = glm::mat4(1.0);
+		transformMat = glm::translate(transformMat, cubePositions[i]);
+		double randS = (rand() % 10000) / 10000.0 * 2.0;
+		transformMat = glm::scale(transformMat, glm::vec3(randS, randS, randS));
+		cubeInstanceComponent->AddInstance(transformMat);
+
+		float randR = (rand() % 10000) / 10000.0f;
+		float randG = (rand() % 10000) / 10000.0f;
+		float randB = (rand() % 10000) / 10000.0f;
+		float randA = (rand() % 10000) / 10000.0f;
+
+		cubeCustomData[i * 4 + 0] = randR;
+		cubeCustomData[i * 4 + 1] = randG;
+		cubeCustomData[i * 4 + 2] = randB;
+		cubeCustomData[i * 4 + 3] = randA;
+	}
+	cubeInstanceComponent->mCustomDataBuffer = cubeCustomData;
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// build and compile our shader zprogram
+	// ------------------------------------
+	TGVertexShader* baseVS = new TGVertexShader("Shaders/instancedGBufferMainPass.vert", "MyVS");
+	TGFragmentShader* basePS = new TGFragmentShader("Shaders/instancedGBufferMainPass.frag", "MyPS");
+	std::shared_ptr<TGShaderProgram> ourShader(new TGShaderProgram());
+	ourShader->AddVertexShader(baseVS);
+	ourShader->AddFragmentShader(basePS);
+	ourShader->BindShaderProgram();
+
+	TGVertexShader* groundVS = new TGVertexShader("Shaders/gbufferMainPass.vert", "GVS");
+	TGFragmentShader* groundPS = new TGFragmentShader("Shaders/gbufferMainPass.frag", "GPS");
+	std::shared_ptr<TGShaderProgram> groundShader(new TGShaderProgram());
+	groundShader->AddVertexShader(groundVS);
+	groundShader->AddFragmentShader(groundPS);
+	groundShader->BindShaderProgram();
+
+	TGVertexShader* screenVS = new TGVertexShader("Shaders/gbufferLightPass.vert", "SVS");
+	TGFragmentShader* screenPS = new TGFragmentShader("Shaders/gBufferLightPassMass.frag", "SPS");
+	std::shared_ptr<TGShaderProgram> screenShader(new TGShaderProgram());
+	screenShader->AddVertexShader(screenVS);
+	screenShader->AddFragmentShader(screenPS);
+	screenShader->BindShaderProgram();
+
+	float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
+	// screen quad VAO
+	unsigned int quadVAO, quadVBO;
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	std::shared_ptr<TGFrameBuffer> mainPassFrameBuffer = std::make_shared<TGFrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
+	int mYaw = 0;
+
+	while (!glfwWindowShouldClose(window))
+	{
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		processInput(window);
+
+		mainPassFrameBuffer->Use();
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// 使用实例化 VS + PS 渲染大批量立方体
+		ourShader->UseProgram();
+		glm::mat4 view = player->GetPlayerCamera()->GetCameraViewMatrix();
+		ourShader->SetMatrix4x4("view", glm::value_ptr(view));
+		glm::mat4 projection = player->GetPlayerCamera()->GetCameraProjectionMatrix();
+		ourShader->SetMatrix4x4("projection", glm::value_ptr(projection));
+		cubeInstanceComponent->Draw(ourShader);
+
+		// 使用正常的 VS + PS 渲染地面
+		groundShader->UseProgram();
+		groundShader->SetMatrix4x4("view", glm::value_ptr(view));
+		groundShader->SetMatrix4x4("projection", glm::value_ptr(projection));
+		glm::mat4 groundModel = glm::mat4(1.0);
+		groundShader->SetMatrix4x4("model", glm::value_ptr(groundModel));
+		groundGeometry->DrawMesh(groundShader);
+
+		mainPassFrameBuffer->EndUse();
+
+		// 延迟渲染光照信息
 		glDisable(GL_DEPTH_TEST);
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);

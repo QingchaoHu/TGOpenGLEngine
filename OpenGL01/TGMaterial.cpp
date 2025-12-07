@@ -5,7 +5,7 @@ TGMaterial::TGMaterial()
 
 }
 
-void TGMaterial::ApplyToShader(std::shared_ptr<TGShaderProgram> shader)
+int TGMaterial::ApplyToShader(std::shared_ptr<TGShaderProgram> shader)
 {
 	for (int i = 0; i < 32; i++)
 	{
@@ -21,12 +21,13 @@ void TGMaterial::ApplyToShader(std::shared_ptr<TGShaderProgram> shader)
 	int roughnessTextureNumber = 0;
 	int normalTextureNumber = 0;
 	int bumpTextureNumber = 0;
+	int diffuseCubeTextureNumber = 0;
 
 	for (int i = 0; i < mTextures.size(); i++)
 	{
 		std::shared_ptr<ITGTexture> oneTexture = mTextures[i];
 
-		int activedTexNumber = diffuseTextureNumber + ambientTextureNumber + specularTextureNumber + shininessTextureNumber + metalnessTextureNumber + roughnessTextureNumber + normalTextureNumber + bumpTextureNumber;
+		int activedTexNumber = diffuseTextureNumber + ambientTextureNumber + specularTextureNumber + shininessTextureNumber + metalnessTextureNumber + roughnessTextureNumber + normalTextureNumber + bumpTextureNumber + diffuseCubeTextureNumber;
 
 		glActiveTexture(GL_TEXTURE0 + activedTexNumber);
 		glEnable(GL_TEXTURE_2D);
@@ -87,7 +88,7 @@ void TGMaterial::ApplyToShader(std::shared_ptr<TGShaderProgram> shader)
 		{
 			shader->SetInt("material.texture_round", activedTexNumber);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, oneTexture->GetID());
-			diffuseTextureNumber++;
+			diffuseCubeTextureNumber++;
 		}
 	}
 
@@ -129,6 +130,8 @@ void TGMaterial::ApplyToShader(std::shared_ptr<TGShaderProgram> shader)
 	{
 		shader->SetVector3("material.diffuse", mDiffuse);
 	}
+
+	return diffuseTextureNumber + ambientTextureNumber + specularTextureNumber + shininessTextureNumber + metalnessTextureNumber + roughnessTextureNumber + normalTextureNumber + bumpTextureNumber + diffuseCubeTextureNumber;
 }
 
 std::shared_ptr<ITGTexture> TGMaterial::GetTexture(int index)

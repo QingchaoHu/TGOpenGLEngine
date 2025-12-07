@@ -119,5 +119,8 @@ void main()
         }
     }
 
+    float gamma = 2.2;
+    lighting = pow(lighting, 2);
+
     FragColor = vec4(lighting, 1.0);
 }

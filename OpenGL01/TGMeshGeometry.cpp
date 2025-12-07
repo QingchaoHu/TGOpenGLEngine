@@ -184,43 +184,50 @@ bool TGMeshGeometry::DrawMesh(std::shared_ptr<TGShaderProgram> shader)
 		glDepthFunc(GL_ALWAYS);
 	}
 
-	//unsigned int diffuseNr = 1;
-	//unsigned int specularNr = 1;
-	//for (unsigned int i = 0; i < mTextures.size(); ++i)
-	//{
-	//	glActiveTexture(GL_TEXTURE0 + i);
-
-	//	if (mTextures[i]->GetTextureType() == ETGTextureType_Texture2D)
-	//	{
-	//		std::string number = "";
-	//		std::string name = mTextures[i]->GetType();
-
-	//		if (name == "texture_diffuse")
-	//			number = std::to_string(diffuseNr++);
-	//		else if (name == "texture_specular")
-	//			number = std::to_string(specularNr++);
-
-	//		shader->SetInt(("material." + name + number).c_str(), i);
-	//		glBindTexture(GL_TEXTURE_2D, mTextures[i]->GetID());
-	//	}
-	//	else
-	//	{
-	//		shader->SetInt("material.round_diffuse", i);
-	//		glBindTexture(GL_TEXTURE_CUBE_MAP, mTextures[i]->GetID());
-	//	}
-	//}
-
-	//shader->SetVector3("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
-	//shader->SetVector3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-	//shader->SetVector3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-	//shader->SetFloat("material.shininess", 32.0f);
-
 	mMaterial->ApplyToShader(shader);
 
 	// ReBind VAO
 	glBindVertexArray(mVAO);
 	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)0);
 	glBindVertexArray(0);
+	return true;
+}
+
+bool TGMeshGeometry::DrawInstanceMesh(std::shared_ptr<TGShaderProgram> shader, TGDrawInstanceProxy instanceProxy)
+{
+	if (bDirty) Generate();
+
+	if (bOpenDepthTest)
+	{
+		glDepthFunc(GL_LESS);
+	}
+	else
+	{
+		glDepthFunc(GL_ALWAYS);
+	}
+
+	int textureNumber = mMaterial->ApplyToShader(shader);
+
+	glActiveTexture(GL_TEXTURE0 + textureNumber);
+	glBindTexture(GL_TEXTURE_2D, instanceProxy.mTransformBufferTex->GetID());
+	shader->SetInt("instance.texture_transform", textureNumber);
+
+	glActiveTexture(GL_TEXTURE0 + textureNumber + 1);
+	glBindTexture(GL_TEXTURE_2D, instanceProxy.mCustomBufferTex->GetID());
+	shader->SetInt("instance.texture_custom", textureNumber + 1);
+
+	shader->SetInt("instance.per_custom_number", instanceProxy.mPerInstanceCustomDataNumber);
+
+	int transformTextureSize = instanceProxy.mTransformBufferTex->GetTextureWidth();
+	shader->SetInt("instance.transform_texture_size", transformTextureSize);
+
+	int customTextureSize = instanceProxy.mCustomBufferTex->GetTextureWidth();
+	shader->SetInt("instance.custom_texture_size", customTextureSize);
+
+	glBindVertexArray(mVAO);
+	glDrawElementsInstanced(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)0, instanceProxy.mInstanceNumber);
+	glBindVertexArray(0);
+
 	return true;
 }
 

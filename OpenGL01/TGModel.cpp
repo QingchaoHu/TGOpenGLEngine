@@ -3,18 +3,37 @@
 #include "TGMeshGeometry.h"
 #include <assimp/scene.h>
 #include <set>
+#include "TGInstancedMesh.h"
 
 TGModel::TGModel(std::string path)
 {
 	LoadModel(path);
 }
 
+TGModel::TGModel()
+{
+
+}
+
 void TGModel::Draw(std::shared_ptr<TGShaderProgram> shader)
 {
 	for (unsigned int i = 0; i < mMeshes.size(); ++i)
 	{
-		mMeshes[i].DrawMesh(shader);
+		mMeshes[i]->DrawMesh(shader);
 	}
+}
+
+void TGModel::DrawInstance(std::shared_ptr<TGShaderProgram> shader, TGDrawInstanceProxy instanceProxy)
+{
+	for (unsigned int i = 0; i < mMeshes.size(); ++i)
+	{
+		mMeshes[i]->DrawInstanceMesh(shader, instanceProxy);
+	}
+}
+
+void TGModel::AddMeshObject(std::shared_ptr<TGMeshGeometry> meshComponent)
+{
+	mMeshes.push_back(meshComponent);
 }
 
 void TGModel::LoadModel(std::string path)
@@ -49,7 +68,7 @@ void TGModel::ProcessNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-TGMeshGeometry TGModel::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+std::shared_ptr<TGMeshGeometry> TGModel::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
 	std::vector<TGVertex> vertices;
 	std::vector<unsigned int> indices;
@@ -79,8 +98,8 @@ TGMeshGeometry TGModel::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		}
 	}
 
-	TGMeshGeometry Mesh;
-	Mesh.AddSubMesh(mesh->mName.C_Str(), vertices, indices);
+	std::shared_ptr<TGMeshGeometry> Mesh = std::make_shared<TGMeshGeometry>();
+	Mesh->AddSubMesh(mesh->mName.C_Str(), vertices, indices);
 
 	if (mesh->mMaterialIndex >= 0)
 	{
@@ -99,7 +118,7 @@ TGMeshGeometry TGModel::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			innerMaterial->AddTexture(mLoadedTexture[key]);
 		}
 
-		Mesh.SetMaterial(innerMaterial);
+		Mesh->SetMaterial(innerMaterial);
 	}
 
 	return Mesh;

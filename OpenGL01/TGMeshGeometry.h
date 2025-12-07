@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <glm/glm.hpp>
 #include <map>
@@ -8,7 +8,7 @@
 #include "TGTexture.h"
 #include <GL/glew.h>
 #include "TGMaterial.h"
-#include <iostream>
+#include "TGInstancedMesh.h"
 
 class TGShaderProgram;
 
@@ -165,9 +165,7 @@ public:
 
 	virtual bool DrawMesh(std::shared_ptr<TGShaderProgram> shader);
 
-	//int AddTexture(std::string texturePath, std::string type);
-
-	//int AddTexture(std::shared_ptr<ITGTexture> texture);
+	virtual bool DrawInstanceMesh(std::shared_ptr<TGShaderProgram> shader, TGDrawInstanceProxy instanceProxy);
 
 	void SetMaterial(std::shared_ptr<TGMaterial> material);
 

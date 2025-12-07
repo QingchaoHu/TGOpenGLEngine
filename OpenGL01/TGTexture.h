@@ -14,7 +14,9 @@ enum class ETGDataFormat
 	ETGDataFormat_RGB = 6,
 	ETGDataFormat_RGB16F = 7,
 	ETGDataFormat_RGB32F = 8,
-	ETGDataFormat_RGBA = 9
+	ETGDataFormat_RGBA = 9,
+	ETGDataFormat_RGBA16F = 10,
+	ETGDataFormat_RGBA32F = 11
 };
 
 enum ETGTextureWrapType
@@ -101,6 +103,10 @@ public:
 	virtual unsigned char* GetPixelValueC();
 
 	virtual float* GetPixelValueF();
+
+	virtual int GetTextureWidth();
+
+	virtual int GetTextureHeight();
 
 protected:
 	unsigned int mTexWidth;

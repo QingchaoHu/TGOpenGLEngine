@@ -17,3 +17,5 @@
 ![image](https://github.com/ThomasZhong1997/TGOpenGLEngine/blob/main/imgs/DeferRender100Lights.png)
 ## Optimize To Draw 1000 Different Type Lights in One Scene
 ![image](https://github.com/ThomasZhong1997/TGOpenGLEngine/blob/main/imgs/DeferRender1000Lights.png)
+## Render 1 million Cubes with Different Diffuse Colors
+![image](https://github.com/ThomasZhong1997/TGOpenGLEngine/blob/main/imgs/OneMiliionCube.png)

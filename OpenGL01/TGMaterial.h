@@ -5,12 +5,19 @@
 #include "TGShaderProgram.h"
 #include <GL/glew.h>
 
+enum ETGMaterialType
+{
+	ETGMaterialType_Opaque,
+	ETGMaterialType_Mask,
+	ETGMaterialType_Translucent
+};
+
 class TGMaterial
 {
 public:
 	TGMaterial();
 
-	void ApplyToShader(std::shared_ptr<TGShaderProgram> shader);
+	int ApplyToShader(std::shared_ptr<TGShaderProgram> shader);
 
 	std::shared_ptr<ITGTexture> GetTexture(int index);
 
@@ -31,5 +38,7 @@ public:
 	glm::vec3 mDiffuse = glm::vec3(1.0, 1.0, 1.0);
 
 	std::vector<std::shared_ptr<ITGTexture>> mTextures;
+
+	ETGMaterialType mMaterialType = ETGMaterialType_Opaque;
 };
 
